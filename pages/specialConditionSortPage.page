@@ -1,0 +1,60 @@
+<apex:page standardController="Site_Association__c" extensions="SpecialConditionCon">
+
+<apex:includeScript value="/support/console/22.0/integration.js"/>
+      
+    <script type="text/javascript">
+        function testIsInConsole(txnId) {
+            
+            if (sforce.console.isInConsole()) {
+                 srcUp(txnId);                                 
+               } else {
+                               
+                 window.open(txnId);                                           
+            }
+        }
+        
+        
+             
+    </script>
+  
+     <apex:form id="form">
+       
+         <apex:pageBlock title="Special Conditions" id="table">
+             <apex:pageBlockButtons location="top"  rendered="{!$ObjectType.Special_Conditions__c.Createable}">
+               <!-- <apex:commandButton id="combo" value="New Special Conditions" onclick="javascript:srcUp('{!URLFOR($Action.Special_Conditions__c.New,null,['CF00Na000000Arhfh'=siteAss.name])}');"/>-->
+                 <apex:commandButton id="combo" value="New Special Conditions" onclick="javascript:testIsInConsole('{!URLFOR($Action.Special_Conditions__c.New,null,['CF00Na000000Arhfh'=siteAss.name])}');"/>
+             </apex:pageBlockButtons>
+         <apex:outputText value="No records to display" rendered="{!NULLVALUE(specialConList.size, 0) == 0}"/>
+             <apex:pageBlockTable value="{!specialConList}" var="spec" rendered="{!NULLVALUE(specialConList.size, 0) != 0}"> 
+                     
+                <apex:column headerValue="Action" >
+                       <apex:outputLink value="/{!spec.id}/e?retURL=%2F{!spec.Site_Association__c}" target="_parent" rendered="{!$ObjectType.Special_Conditions__c.Updateable}">Edit</apex:outputLink>&nbsp;|&nbsp;
+                       <apex:outputText rendered="{!$ObjectType.Special_Conditions__c.Deletable}">
+                       <a href="javascript:if (window.confirm('Are you sure?')) DeleteAccount('{!spec.Id}');" styleclass="btn">Del</a>
+                       </apex:outputText>
+                </apex:column>
+                <apex:column value="{!spec.SPC_Description__c}"/>
+                <apex:column value="{!spec.Active__c}"/>
+                <apex:column value="{!spec.Start_Date__c}"/>
+                <apex:column value="{!spec.End_Date__c}"/>
+                <apex:column value="{!spec.SPC_Details__c}"/>
+                <apex:column headervalue="Last Modified By" >
+                    <apex:commandLink id="LastModifiedBy" action="/{!spec.LastModifiedBy.Id}" value="{!spec.LastModifiedBy.Name}" />
+                    <apex:outputText value=", {!spec.lastmodifieddate}" />  
+                </apex:column>
+                     
+             </apex:pageBlockTable>
+         
+         <apex:outputPanel rendered="{!NULLVALUE(specialConList.size, 0) != 0}">
+         <apex:commandLink value="Show All items" action="{!showmore}" reRender="table"  rendered="{!Enable}"/>
+         </apex:outputPanel>
+         </apex:pageBlock>
+         
+          
+        <apex:actionFunction action="{!doDelete}" name="DeleteAccount" reRender="form" >
+       <apex:param name="specid" value="" assignTo="{!selectedSpecId}"/>
+    </apex:actionFunction>
+   
+
+     </apex:form>
+</apex:page>

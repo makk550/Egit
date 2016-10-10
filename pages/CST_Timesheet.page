@@ -1,0 +1,183 @@
+<apex:page Controller="CST_Timesheet" id="pg" >
+  <apex:sectionHeader title="Customer Success Team Time Entry" /> 
+    <style>
+        .transparentBoxes
+        {
+            background-color:transparent; 
+             width:35px; 
+            // border: 0px;
+            text-align:right;
+        }
+        .headerClass_old
+        {
+            background-color:#cfeef8;
+            text-align:center;
+            
+        }
+        .headerClass {
+            background: white url('/img/alohaSkin/grid_headerbg.gif') 0 bottom repeat-x;
+            background-image: url(https://cs12.salesforce.com/img/alohaSkin/grid_headerbg.gif);
+            background-repeat-x: repeat;
+            background-repeat-y: no-repeat;
+            background-attachment: initial;
+            background-position-x: 0px;
+            background-position-y: 100%;
+            background-origin: initial;
+            background-clip: initial;
+            background-color: #cfeef8;
+            border: 1px solid black;
+            border-width: 0 0 1px 1px;
+            border-top-width: 0px;
+            border-right-width: 0px;
+            border-bottom-width: 1px;
+            border-left-width: 1px;
+            color: black;
+            font-size: .9em;
+            font-weight: bold;
+            padding: 5px 2px 4px 5px;
+            padding-top: 5px;
+            padding-right: 2px;
+            padding-bottom: 4px;
+            padding-left: 5px;
+            text-align:center;
+            vertical-align:bottom;
+           }
+           
+           .tdBG
+           {
+                  border: 1px solid black;
+                  border-width: 0 0 1px 1px;
+                  border-top-width: 1px;
+                  border-right-width: 0px;
+                  border-bottom-width: 0px;
+                  border-left-width: 1px;
+                  padding-left: 4px;
+                  padding-right: 4px;
+                  text-align:center;
+           }
+           .greyBG
+           {
+                  border: 1px solid black; border-width: 0 0 1px 1px; border-top-width: 1px;
+                  border-right-width: 0px; border-bottom-width: 0px; border-left-width: 1px;
+                  padding-left: 4px; padding-right: 4px; text-align:center;
+                  background-color:#efefef;text-align:right; font-size: .9em;  font-weight: bold;
+           }
+           
+           .trBG
+           {
+                    background-color:white;
+                    border: solid black 1px
+                 
+            }
+                
+          .trBG:hover
+            {
+                    background-color:#cfeef8;
+                  //  border: solid black 1px;
+            }
+    </style>  
+     <apex:form id="frm" >
+       <table  cellpadding="0" cellspacing="0" style="width: 20%">
+         <tr>  
+           <td><font style="font-size:80%; font-weight: bold">Week Ending Date&nbsp;&nbsp;Current Date</font></td>
+           <td>&nbsp;</td>
+           <td>&nbsp;</td>
+         </tr>
+         <tr>
+           <td><input type="text" tabindex="1" style="width:0px;border:0px; color:white" /><apex:inputField value="{!task_temp.Week_End_Date__c}" /></td>
+           <td style="width:20%"><apex:commandButton action="{!RefreshTasks}"  value="Go" /></td>
+           <td style="width:20%; text-align:center"><apex:commandButton action="{!SaveTasks}"  value="Save" status="msgSave"/></td>
+         </tr>
+       </table>
+       <apex:messages style="color:red" />
+       <apex:actionStatus id="msgSave" startText="Saving..." stopText="" startStyle="color:green" ></apex:actionStatus>
+       <apex:pageBlock id="pgBlock" >               
+       <apex:pageBlockSection columns="1"  id="block2" title="Task Details" >
+             <apex:outputPanel id="panelRefresh" >
+               <table cellpadding="0" cellspacing="0" style="width:100%;  border: solid silver 1px">
+                 <tr>
+                      <th class="headerClass" > 
+                        <apex:outputText value="{0,date, MM/dd/yyyy}">
+                           <apex:param value="{! DisplayDate}" />
+                         </apex:outputText>
+                      </th>   
+                      <th class="headerClass">&nbsp;
+                      </th>   
+                      <th class="headerClass">&nbsp;
+                      </th>   
+                      <th colspan="2" class="headerClass">Account Planning 
+                      </th >
+                      <th  colspan="5" class="headerClass">Value Creation 
+                      </th>
+                      <th colspan="2" class="headerClass">Solution Deployment 
+                      </th>
+                      <th colspan="3" class="headerClass">Remediation 
+                      </th>
+                      <th colspan="3" class="headerClass">Other 
+                      </th>
+                      <td class="headerClass">&nbsp;
+                      </td>
+                      <th colspan="2" class="headerClass">Customer Interaction
+                      </th>
+                      <td class="headerClass">&nbsp;
+                      </td>                      
+                 </tr>
+                 <tr >
+                      <td class="headerClass">Account</td>   
+                      <td class="headerClass" >CA Account ID</td>   
+                      <td class="headerClass" >Site Id</td>   
+                      
+                          <apex:repeat value="{!lstCategory}" var="cat" >
+                              <apex:outputPanel rendered="{!(cat == 'Face to Face')}">
+                                   <td class="headerClass">Total(hours)</td>
+                              </apex:outputPanel>
+                              <td class="headerClass"> {!cat} </td>
+                              
+                              <apex:outputPanel rendered="{!(cat== 'Call')}">
+                               <td class="headerClass">Total(count)</td>
+                              </apex:outputPanel>   
+                          </apex:repeat>
+                  </tr>  
+                 <apex:repeat value="{!lstWrap}" var="wrap" id="rptWrap" >
+                   <tr class="trBG">
+                          <td class="{!IF(wrap.accname_short=='','headerClass','greyBG')}"><div style="width:150px;text-align:left;"><apex:outputLabel title="{!wrap.acc.name}" style="{!IF(wrap.accname_short=='','font-style:italic','')}" value="{!IF(wrap.accname_short=='','OTHER',wrap.accname_short)}" ></apex:outputLabel> </div></td>  
+                          <td class="{!IF(wrap.accname_short=='','headerClass','greyBG')}"><div style="width:100%;text-align:left;"><apex:outputLabel title="{!wrap.acc.Enterprise_ID__c}" style="{!IF(wrap.accname_short=='','font-style:italic','')}" value="{!wrap.acc.Enterprise_ID__c}" ></apex:outputLabel> </div></td>  
+                          <td class="{!IF(wrap.accname_short=='','headerClass','greyBG')}"><div style="width:100%;text-align:left;"><apex:outputLabel title="{!wrap.acc.Commercial_ID__c}" style="{!IF(wrap.accname_short=='','font-style:italic','')}" value="{!wrap.acc.Commercial_ID__c}" ></apex:outputLabel> </div></td>  
+                          <apex:repeat value="{!wrap.lstTask}" var="tsk" id="rptTask" >
+                              <apex:outputPanel id="outTotalHours" rendered="{!(tsk.Category__c == 'Face to Face')}">
+                                   <td class="tdBG" style="{! IF(tsk.Task_Account_Name__c =='Totals' && tsk.Task_Account_Id__c == null,'background-color:#818290;color:white','background-color:#efefef')}"><apex:outputText value="{!wrap.totalhours}"  StyleClass="transparentBoxes" /></td>                      
+                              </apex:outputPanel>    
+                              <td class="tdBG" style="{! IF(tsk.Task_Account_Name__c =='Totals' && tsk.Task_Account_Id__c == null,'background-color:#818290;color:white', IF((tsk.Category__c <> 'Internal Activities' && tsk.Category__c <> 'Training' && tsk.Category__c <> 'Out of Office'),'',IF(tsk.Task_Account_Id__c == null,'','background-color:#f8f8f8; border:0px')))}" > 
+                                  <!--Display hours Start -->
+                                    <apex:outputPanel id="outInputHours" rendered="{!(tsk.Category__c != 'Face to Face' && tsk.Category__c != 'Call') && ((tsk.Category__c <> 'Internal Activities' && tsk.Category__c <> 'Training' && tsk.Category__c <> 'Out of Office') || (tsk.Task_Account_Name__c=='')||(tsk.Task_Account_Name__c=='Totals'))}" > 
+                                       <apex:inputField id="inputHours" rendered="{! !(tsk.Task_Account_Name__c =='Totals' && tsk.Task_Account_Id__c == null)}"  value="{!tsk.Actual_Time_Spent_Hours__c}" StyleClass="transparentBoxes"  /> 
+                                        <apex:outputpanel rendered="{! (tsk.Task_Account_Name__c =='Totals' && tsk.Task_Account_Id__c == null)}" StyleClass="transparentBoxes" style="text-align:right" >
+                                            <input type="text" readonly="readonly"   Class="transparentBoxes" value="{!tsk.Actual_Time_Spent_Hours__c}" style="border:0px; color:white" />
+                                        </apex:outputPanel>
+                                   </apex:outputPanel>
+                                  <!--Display hours End-->
+                                  <!--Display Interaction Count Start -->
+                                   <apex:outputPanel id="outInteractionCount" rendered="{! (tsk.Category__c == 'Face to Face' || tsk.Category__c == 'Call')}" >
+                                       <apex:inputField id="inputCount" rendered="{! !(tsk.Task_Account_Name__c =='Totals' && tsk.Task_Account_Id__c == null)}" value="{!tsk.Interaction_Count__c}" StyleClass="transparentBoxes"  /> 
+                                       <apex:outputpanel rendered="{! (tsk.Task_Account_Name__c =='Totals' && tsk.Task_Account_Id__c == null)}" >
+                                            <apex:inputField id="inputCountAccount" StyleClass="transparentBoxes" value="{!tsk.Interaction_Count__c}" style="border:0px; color:white" />
+                                       </apex:outputpanel> 
+                                   </apex:outputPanel>
+                                  <!--Display Interaction Count End-->  
+                              </td>
+                              <apex:outputPanel id="outTotalCount" rendered="{!(tsk.Category__c == 'Call')}">
+                                   <td class="tdBG" style="{! IF(tsk.Task_Account_Name__c =='Totals' && tsk.Task_Account_Id__c == null,'background-color:#818290;color:white','background-color:#efefef')}"><apex:outputText value="{!wrap.totalcount}"  StyleClass="transparentBoxes" /></td>                      
+                              </apex:outputPanel>
+                          </apex:repeat>
+                     
+                      
+                    </tr>  
+                 </apex:repeat>
+            </table>
+            </apex:outputPanel>
+        </apex:pageBlockSection>
+   </apex:pageBlock> 
+       
+     </apex:form>
+  
+</apex:page>

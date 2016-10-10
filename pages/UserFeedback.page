@@ -1,0 +1,435 @@
+<apex:page showHeader="false" sidebar="false" standardStylesheets="false">
+    <html xmlns="http://www.w3.org/1999/xhtml">
+        <head>
+            <script type='text/javascript'>
+                
+                function createPopinitiator(windowInnerWidth){
+                   userFeedBackSourceId = 'External';
+                   var mainDiv = document.createElement('div');
+                   mainDiv.setAttribute('id','mainDiv');
+                   mainDiv.style.position ='absolute';
+                   mainDiv.style.right ='0';
+                   mainDiv.style.bottom = '0';
+                   
+                       var initiator = document.createElement('div');
+                       initiator.setAttribute('id','initiator');
+                       initiator.setAttribute('class','initiatorClass');
+                       initiator.setAttribute('onClick','createPopUp(this.id,'+windowInnerWidth+')');
+                       initiator.style.backgroundColor = '#0066ff';
+                       initiator.style.borderRadius = '5%';
+                       initiator.style.padding = '7px 45px';
+                       initiator.style.textDecoration = 'none';
+                       initiator.style.display = 'inline-block';
+                       initiator.style.fontSize = '14px';
+                       initiator.style.cursor = 'pointer';
+                       initiator.style.color = '#fff';
+                       initiator.innerHTML = 'Feedback &#10138;';
+                       initiator.style.font = 'bold 15px arial,serif';
+                       initiator.style.boxShadow = '0px';
+                       mainDiv.appendChild(initiator);
+                       console.log(document.body);
+                       document.body.appendChild(mainDiv);
+                       feedbackValueId = document.getElementById('initiator').id;
+                }
+                               
+                function createPopUp(parentId, windowInnerWidth){
+                    if(parentId != ''){
+                        document.getElementById(parentId).style.display = 'none';
+                    }
+                    var mainElement = document.createElement('div');
+                        var parentElement = document.createElement('div');
+                        parentElement.setAttribute('id','overlay');
+                        parentElement.style.position ='fixed';
+                        parentElement.style.top ='0px';
+                        parentElement.style.left ='0px';
+                        parentElement.style.width ='100%';
+                        parentElement.style.height ='100%';
+                        parentElement.style.backgroundColor ='#000';
+                        parentElement.style.filter ='alpha(opacity=40)';
+                        parentElement.style.opacity ='0.4';
+                        parentElement.style.zIndex ='999999999';
+                        parentElement.style.display ='block';
+               
+                            var innerElement = document.createElement('div');
+                            innerElement.setAttribute('id','popup');
+                            innerElement.style.width = '85%';
+                            if(windowInnerWidth >= 600){
+                                innerElement.style.margin ='100px auto';
+                            }else{
+                                innerElement.style.margin ='1px auto';
+                            }
+                            innerElement.style.display = 'block';
+                            innerElement.style.position = 'fixed';
+                            innerElement.style.zIndex ='9999';
+                            innerElement.style.padding = '30px';
+                            innerElement.style.textAlign = 'left';
+                            innerElement.style.background = '#000';
+                            innerElement.style.borderRadius = '4px';
+                            innerElement.style.border = '1px solid #000';
+                         
+                                var subElement = document.createElement('div');
+                                subElement.setAttribute('id','popupClass');
+                                subElement.style.maxWidth = windowInnerWidth+'px';
+                                subElement.style.margin = '20px auto';
+                                subElement.style.background = '#f3f3f3';
+                                subElement.style.position = 'relative';
+                                subElement.style.zIndex = '9999';
+                                subElement.style.padding = '10px';
+                                subElement.style.borderRadius = '5px';
+                                subElement.style.boxShadow = '0 2px 5px #000';
+                                subElement.style.textAlign = 'left';
+                                
+                                var closePopup = document.createElement('div');
+                                closePopup.setAttribute('id','closeId');
+                                closePopup.style.right = '-8px';
+                                closePopup.style.height = '30px';
+                                closePopup.style.position = 'absolute';
+                                closePopup.style.top = '-10px';
+                                closePopup.style.width = '30px';
+                                closePopup.style.cursor = 'pointer';
+                                closePopup.style.backgroundColor = '#f3f3f3';
+                                closePopup.style.borderRadius = '50%';
+                                closePopup.style.lineheight = '36px';
+                                closePopup.setAttribute('onClick','closePopup(this.id)');
+                                
+                                    var closePoptext = document.createElement('div');
+                                    closePoptext.setAttribute('id','closePoptext');
+                                    closePoptext.innerHTML = '&times;';
+                                    closePoptext.style.fontSize = 'x-large';
+                                    closePoptext.style.position = 'absolute';
+                                    closePoptext.style.left = '9px';
+                                    closePoptext.style.top = '0px';
+                                    closePoptext.style.color = '#0066ff';
+                                    closePoptext.style.fontFamily = "Impact,Charcoal,sans-serif";
+                                    closePopup.appendChild(closePoptext);
+                                subElement.appendChild(closePopup);
+                                
+                                var contentDiv = document.createElement('div');
+                                contentDiv.setAttribute('id','divContent');
+                                contentDiv.innerHTML = 'Please fill all the details';
+                                contentDiv.style.color = '#0066ff';
+                                contentDiv.style.font = 'bold 15px arial,serif';
+                                contentDiv.style.padding = '11px';
+                                subElement.appendChild(contentDiv);
+            
+                                var errorSpan = document.createElement('span');
+                                errorSpan.setAttribute('id','errorSpan');
+                                subElement.appendChild(errorSpan);
+                                
+                                    var subContentDiv = document.createElement('div');
+                                    subContentDiv.setAttribute('id','subContentDiv');
+                                    subContentDiv.style.backgroundColor = '#999999';
+                                    if(windowInnerWidth >= 600){
+                                        subContentDiv.style.height = '260px';
+                                    }else{
+                                        subContentDiv.style.height = '330px';
+                                    }
+                                    subContentDiv.style.borderRadius = '5px';
+                                        
+                                        var tableFormatDiv = document.createElement('div');
+                                        tableFormatDiv.setAttribute('id','tableFormatDiv');
+                                        
+                                            var innerContentDiv = document.createElement('div');
+                                            innerContentDiv.setAttribute('id','innerContentDiv');
+                                            innerContentDiv.innerHTML = 'Rate the Application';
+                                            innerContentDiv.style.padding = '12px';
+                                            innerContentDiv.style.color = '#0066ff';
+                                            innerContentDiv.style.font = 'bold 15px arial,serif';
+                                        
+                                               var ratingSpanDiv = document.createElement('span');
+                                               ratingSpanDiv.setAttribute('id','starRatingId');
+                                               ratingSpanDiv.setAttribute('class','rating');
+                                                                                              
+                                                   var loveEmotion = document.createElement('label');
+                                                   loveEmotion.setAttribute('id','loveEmotion');
+                                                   loveEmotion.setAttribute('class','emotions');
+                                                   loveEmotion.setAttribute('onClick','changeColorOfEmo(this.id)');
+                                                   if(windowInnerWidth >= 600){
+                                                       loveEmotion.innerHTML = '&#128525;';
+                                                   }else{
+                                                       loveEmotion.innerHTML = '<br/>'+'&#128525;';
+                                                   }
+                                                   loveEmotion.style.fontSize = '35px';
+                                                   loveEmotion.style.padding = '4px';
+                                                   loveEmotion.style.margin = '0px 0px 0px 90px';
+                                               ratingSpanDiv.appendChild(loveEmotion);
+                                                   
+                                                   var happyEmotion = document.createElement('label');
+                                                   happyEmotion.setAttribute('id','happyEmotion');
+                                                   happyEmotion.setAttribute('class','emotions');
+                                                   happyEmotion.setAttribute('onClick','changeColorOfEmo(this.id)');
+                                                   happyEmotion.innerHTML ='&#128522;';
+                                                   happyEmotion.style.fontSize = '35px';
+                                                   happyEmotion.style.padding = '4px';
+                                               ratingSpanDiv.appendChild(happyEmotion);
+                                                   
+                                                   var neutralEmotion = document.createElement('label');
+                                                   neutralEmotion.setAttribute('id','neutralEmotion');
+                                                   neutralEmotion.setAttribute('class','emotions');
+                                                   neutralEmotion.setAttribute('onClick','changeColorOfEmo(this.id)');
+                                                   neutralEmotion.innerHTML ='&#128528;';
+                                                   neutralEmotion.style.fontSize = '35px';
+                                                   neutralEmotion.style.padding = '4px';
+                                               ratingSpanDiv.appendChild(neutralEmotion);
+                                               
+                                                   var disappointedEmotion = document.createElement('label');
+                                                   disappointedEmotion.setAttribute('id','disappointedEmotion');
+                                                   disappointedEmotion.setAttribute('class','emotions');
+                                                   disappointedEmotion.setAttribute('onClick','changeColorOfEmo(this.id)');
+                                                   disappointedEmotion.innerHTML ='&#128542;';
+                                                   disappointedEmotion.style.fontSize = '35px';
+                                                   disappointedEmotion.style.padding = '4px';
+                                               ratingSpanDiv.appendChild(disappointedEmotion);
+                                               
+                                                   var cryingEmotion = document.createElement('label');
+                                                   cryingEmotion.setAttribute('id','cryingEmotion');
+                                                   cryingEmotion.setAttribute('class','emotions');
+                                                   cryingEmotion.setAttribute('onClick','changeColorOfEmo(this.id)');
+                                                   cryingEmotion.innerHTML ='&#128557;';
+                                                   cryingEmotion.style.fontSize = '35px';
+                                                   cryingEmotion.style.padding = '4px';
+                                               ratingSpanDiv.appendChild(cryingEmotion);
+                                            innerContentDiv.appendChild(ratingSpanDiv);
+                                        tableFormatDiv.appendChild(innerContentDiv);
+                                           console.log(tableFormatDiv); 
+                                            
+                                            var expressionDiv = document.createElement('div');
+                                            expressionDiv.setAttribute('id','expressionDiv');
+                                            expressionDiv.innerHTML = 'How you feel';
+                                            expressionDiv.style.color = '#0066ff';
+                                            expressionDiv.style.font = 'bold 15px arial,serif';
+                                            expressionDiv.style.padding = '12px';
+                    
+                                                var expressionTextDiv = document.createElement('span');
+                                                expressionTextDiv.setAttribute('id','expressionTextDiv');
+                                                expressionTextDiv.style.font = 'bold 20px arial,serif';
+                                                expressionTextDiv.style.color = '#4dffa6';
+                                                expressionTextDiv.style.margin = '0px 0px 0px 150px';
+                                            expressionDiv.appendChild(expressionTextDiv);
+                                        tableFormatDiv.appendChild(expressionDiv);
+                                            
+                                            var commentDiv = document.createElement('div');
+                                            commentDiv.setAttribute('id','commentDiv');
+                                            commentDiv.innerHTML = 'Comments';
+                                            commentDiv.style.color = '#0066ff';
+                                            commentDiv.style.font = 'bold 15px arial,serif';
+                                            commentDiv.style.padding = '12px';
+                    
+                                                var commentTextDiv = document.createElement('textarea');
+                                                commentTextDiv.setAttribute('id','commentTextDiv');
+                                                commentTextDiv.setAttribute('cols','25');
+                                                commentTextDiv.style.display = 'block';
+                                                if(windowInnerWidth >= 600){
+                                                    commentTextDiv.setAttribute('rows','4');
+                                                    commentTextDiv.style.margin = '-10px -10px -10px 240px';
+                                                }else{
+                                                    commentTextDiv.setAttribute('rows','3');
+                                                    commentTextDiv.style.margin = '0px 0px 0px 0px';
+                                                }
+                                                commentTextDiv.style.color = '#0000ff';
+                                                commentTextDiv.style.fontFamily = "arial,serif";
+                                                commentTextDiv.style.fontStyle = "normal";
+                                                commentTextDiv.style.fontSize = "medium";
+                                             commentDiv.appendChild(commentTextDiv);
+                                        tableFormatDiv.appendChild(commentDiv);
+                                   subContentDiv.appendChild(tableFormatDiv);
+                                subElement.appendChild(subContentDiv);
+                                   
+                                   var buttonDiv = document.createElement('div');
+                                   buttonDiv.setAttribute('id','buttonDiv');
+                                   buttonDiv.setAttribute('class','buttonDivClass');
+                                   buttonDiv.style.backgroundColor = '#00b300';
+                                   buttonDiv.style.borderRadius = '7%';
+                                   buttonDiv.style.padding = '15px 30px';
+                                   buttonDiv.style.textAlign = 'center';
+                                   buttonDiv.style.textDecoration = 'none';
+                                   buttonDiv.style.width = '50px';
+                                   buttonDiv.style.display = 'block';
+                                   buttonDiv.style.fontSize = '14px';
+                                   if(windowInnerWidth >= 600){
+                                       buttonDiv.style.margin = '4px 78%';
+                                   }else{
+                                       buttonDiv.style.margin = '4px 62%';
+                                   }
+                                   buttonDiv.style.cursor = 'pointer';
+                                   buttonDiv.style.color = '#fff';
+                                   buttonDiv.innerHTML = 'Submit';
+                                   buttonDiv.style.font = 'bold 15px arial,serif';
+                                   buttonDiv.style.boxShadow = '0px';
+                                   buttonDiv.setAttribute('onClick','submitFeeback(this.id)');
+                               subElement.appendChild(buttonDiv);
+                            innerElement.appendChild(subElement);
+                        parentElement.appendChild(innerElement);
+                     document.body.appendChild(parentElement);  
+                     popUpId = document.getElementById('popupClass').id;
+                  }
+                  
+                  function changeColorOfEmo(idValue){
+                     var elementFontSize = document.defaultView.getComputedStyle(document.getElementById(idValue),"").getPropertyValue("color");
+                     elementFontSize = elementFontSize.match(/^rgba?[\s+]?\([\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?/i);
+                     elementFontSize = ((elementFontSize && elementFontSize.length === 4)?"#"+("0"+parseInt(elementFontSize[1],10).toString(16)).slice(-2)+("0"+ parseInt(elementFontSize[2],10).toString(16)).slice(-2)+("0" + parseInt(elementFontSize[3],10).toString(16)).slice(-2):'');
+                     var parentNodeClassName = document.getElementById(idValue).parentNode.children;
+                     var emotionClassIds = document.getElementById(idValue).className;
+                     var listOfEmotionIds = [];
+                     for(var i=0;i<parentNodeClassName.length;i++){
+                         listOfEmotionIds.push(document.getElementsByClassName(emotionClassIds)[i].id);
+                     }
+                     var howYouFeel = ['Happy','Believing','Annoyed','Sad','Irritated'];
+                     
+                     var idAndValuePairArray = [];
+                     for(var k=0;k<howYouFeel.length;k++){
+                       idAndValuePairArray[document.getElementsByClassName(emotionClassIds)[k].id] = howYouFeel[k];
+                     }
+                     
+                     var parentNodeClassName = document.getElementById(idValue).parentNode.id;
+                     var starRatingParentName = document.getElementById(parentNodeClassName).parentNode.id;
+                     var tableIdName = document.getElementById(starRatingParentName).parentNode.id;
+                     var tableFirstChild = document.getElementById(tableIdName).children[1].id;
+                     var expressionFirstChild = document.getElementById(tableFirstChild).children[0].id;
+                     for(var j=0; j<listOfEmotionIds.length;j++){
+                       if(listOfEmotionIds[j] ==idValue && elementFontSize =='#0066ff'){
+                         document.getElementById(listOfEmotionIds[j]).style.color = '#ffff00';
+                         document.getElementById(listOfEmotionIds[j]).style.fontSize = '50px';
+                         changeEmotionIntoText(idAndValuePairArray, idValue);
+                       }else if(elementFontSize =='#ffff00'){
+                         if(listOfEmotionIds[j] ==idValue){
+                             document.getElementById(expressionFirstChild).innerHTML = '';
+                             document.getElementById(listOfEmotionIds[j]).style.color = '#0066ff';
+                             document.getElementById(listOfEmotionIds[j]).style.fontSize = '35px';
+                         }else{
+                             document.getElementById(expressionFirstChild).innerHTML = '';
+                             document.getElementById(listOfEmotionIds[j]).style.color = '#0066ff';
+                             document.getElementById(listOfEmotionIds[j]).style.fontSize = '35px';
+                         }
+                       }else{
+                         document.getElementById(listOfEmotionIds[j]).style.color = '#0066ff';
+                         document.getElementById(listOfEmotionIds[j]).style.fontSize = '20px';
+                       }
+                     }
+                  }
+                  
+                  function changeEmotionIntoText(idAndValuePairArray, idValue){
+                      var emotionParentName = document.getElementById(idValue).parentNode.id;
+                      var ratingParentName = document.getElementById(emotionParentName).parentNode.id;
+                      var tableIdName = document.getElementById(ratingParentName).parentNode.id;
+                      var tableSecondDiv = document.getElementById(tableIdName).children[1].id;
+                      var expressionId = document.getElementById(tableSecondDiv).children[0].id;
+                      for(var i=0;i<Object.keys(idAndValuePairArray).length;i++){
+                          if(idValue == Object.keys(idAndValuePairArray)[i]){
+                             if(windowInnerWidth >= 600){
+                                  document.getElementById(expressionId).style.margin = '0px 0px 0px 150px';    
+                                  document.getElementById(expressionId).value = idAndValuePairArray[idValue];
+                              }else{
+                                  document.getElementById(expressionId).style.margin = '0px 0px 0px 0px';      
+                                  document.getElementById(expressionId).value = '<br/>'+idAndValuePairArray[idValue];                            
+                              }
+                          }
+                      }
+                      document.getElementById(expressionId).innerHTML = document.getElementById(expressionId).value;
+                  }
+                  
+                  function closePopup(closePopUpId){
+                      var popupId = document.getElementById(closePopUpId).parentNode.id;
+                      var popupSubParentId = document.getElementById(popupId).parentNode.id;
+                      var popupParentId = document.getElementById(popupSubParentId).parentNode.id;
+                      document.getElementById(popupParentId).style.display = 'none';
+                  }
+                  
+                  function submitFeeback(feedbackId){
+                     
+                     // to find selected emotion rating value - start
+                     var feedbackIdValue = document.getElementById(feedbackId).parentNode.id;
+                     var popupIdValue = document.getElementById(feedbackIdValue).children[3].id;
+                     var mainTableId = document.getElementById(popupIdValue).children[0].id;
+                     var starRatingId = document.getElementById(mainTableId).children[0].id;
+                     var innerStarRatingId = document.getElementById(starRatingId).children[0].id;
+                     var parentNodeName = document.getElementById(innerStarRatingId).children;
+                     
+                     var listOfStarIds = [];
+                     var listOfStarIdsWithColor = [];
+                     for(var i=0;i<parentNodeName.length;i++){
+                        listOfStarIds[parentNodeName[i].id] = i+1; 
+                        var getIdColor = document.defaultView.getComputedStyle(document.getElementById(parentNodeName[i].id),"").getPropertyValue("color");
+                        getIdColor = getIdColor.match(/^rgba?[\s+]?\([\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?/i);
+                        getIdColor = ((getIdColor && getIdColor.length === 4)?"#"+("0"+parseInt(getIdColor[1],10).toString(16)).slice(-2)+("0"+ parseInt(getIdColor[2],10).toString(16)).slice(-2)+("0" + parseInt(getIdColor[3],10).toString(16)).slice(-2):'');
+                        listOfStarIdsWithColor[parentNodeName[i].id] = getIdColor;
+                     }
+                     
+                     var ratingValue;
+                     for(var i=0;i<Object.keys(listOfStarIdsWithColor).length;i++){
+                         if(listOfStarIdsWithColor[Object.keys(listOfStarIdsWithColor)[i]] == '#ffff00' && Object.keys(listOfStarIdsWithColor)[i] == Object.keys(listOfStarIds)[i]){
+                            ratingValue = listOfStarIds[Object.keys(listOfStarIds)[i]];
+                         }
+                     }
+                     // to find selected emotion rating value - end
+                     
+                     // to find emotion capture value - start
+                     var feelId = document.getElementById(mainTableId).children[1].id;
+                     var innerFeelId = document.getElementById(feelId).children[0].id;
+                     var emotionCaptureValue = document.getElementById(innerFeelId).innerHTML;
+                     // to find emotion capture value - end
+                     
+                     // to find comment value - start
+                     var commentId = document.getElementById(mainTableId).children[2].id;
+                     var commentIdValue = document.getElementById(commentId).children[0].id;
+                     var commentValue = document.getElementById(commentIdValue).value;
+                     // to find comment value - end
+                     
+                     //Web-Service Call and JSON Creation
+                     if((ratingValue == "undefined" || ratingValue == null) && (emotionCaptureValue == 'undefined' || emotionCaptureValue == null || emotionCaptureValue == '')){
+                         var secondChildren = document.getElementById(feedbackIdValue).children[2].id
+                         document.getElementById(secondChildren).innerHTML = '**Please Rate the Application';
+                         document.getElementById(secondChildren).style.fontSize = 'large';
+                         document.getElementById(secondChildren).style.color = 'red';
+                     }else{
+                         var secondChildren = document.getElementById(feedbackIdValue).children[2].id
+                         document.getElementById(secondChildren).innerHTML = '';
+                         emotionCaptureValue = emotionCaptureValue.split('<br>').join('');
+                         var jsonString = '{"data":{"sourceId":"'+userFeedBackSourceId+'","rating":"'+ratingValue+'","emotionCapture":"'+emotionCaptureValue+'","comments":"'+commentValue+'"}}';
+                         var httpRequestObj = new XMLHttpRequest();          
+                         httpRequestObj.open("POST", "https://eapidev.ca.com/userFeedBack", true);
+                         httpRequestObj.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                         if(httpRequestObj.status == 0 && httpRequestObj.readyState == 1){
+                             var parentName = document.getElementById(feedbackId).parentNode.id;
+                             var parentParentName = document.getElementById(parentName).parentNode.id;
+                             var mainDivID = document.getElementById(parentParentName).parentNode.id;
+                             document.getElementById(mainDivID).style.display = 'none';
+                         }
+                         httpRequestObj.send(jsonString);
+                     }
+                  }
+                  
+                  var windowInnerWidth;
+                  var feedbackValueId;
+                  var popUpId;
+                  var userFeedBackSourceId;
+                  
+                  window.onload = function(){
+                      if(window.innerWidth >= 600){
+                         windowInnerWidth = 600;
+                      }else{
+                         windowInnerWidth = 320;
+                      }                      
+                      var windowLocation = window.location.href;
+                      windowLocation = windowLocation.split('?');
+                      if(windowLocation[1] != undefined){
+                          windowLocation = windowLocation[1].split('&');
+                      }
+                      if(windowLocation[0] != undefined){
+                          windowLocation = windowLocation[0].split('=');                      
+                      }
+                      
+                      if(windowLocation != undefined || windowLocation != null){
+                          if(windowLocation[0] == 'popUpType'&& windowLocation[1] == 'inline'){
+                              createPopinitiator(windowInnerWidth);
+                          }else if(windowLocation[1] == 'default'){
+                              //var delay = 8000;
+                              //var x =setTimeout('createPopUp("",windowInnerWidth)', delay); 
+                              createPopUp("",windowInnerWidth);
+                          }
+                      }
+                  }                 
+            </script>
+        </head>
+    </html>
+</apex:page>

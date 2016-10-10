@@ -1,0 +1,9 @@
+<apex:page standardController="Site_Association__c">
+  <apex:detail subject="{!Site_Association__c.Id}" relatedList="false"/>
+  <apex:include pageName="specialConditionSortPage"/>
+  <apex:relatedList list="Special_Conditions__r"/>
+  <apex:relatedList list="Project_Site_Associations__r"/>
+  <apex:relatedList list="Contacts_Site_Association__r"/>
+  <apex:relatedList list="Cases__r"/>
+  <apex:relatedList list="Non_Contract_Offering_Business_Rules__r" rendered="{!$ObjectType.Non_Contract_Offering_Business_Rules__c.accessible}"/>
+</apex:page>

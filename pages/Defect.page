@@ -1,0 +1,39 @@
+<apex:page standardController="Defect__c" extensions="DefectExtensionController">
+    
+    <apex:sectionHeader title="Defect" />
+    <script>
+         
+         function disableOnSubmit(input) {
+            var btn = document.getElementById('{!$Component.formId.pageBlockId.pageBlockButtons.saveBtnId}'); 
+            var btn2 = document.getElementById('{!$Component.formId.pageBlockId.pageBlockButtons.continueBtnId}');
+            setTimeout(function(){ 
+                btn.disabled = 'disabled';
+                // Use the Salesforce CSS style to make the button appear disabled
+                btn.className = 'btnDisabled';
+                btn.value = "Saving..."; 
+                btn2.disabled = 'disabled';
+                // Use the Salesforce CSS style to make the button appear disabled
+                btn2.className = 'btnDisabled';
+                
+            }, 50);
+        }
+    </script>
+    <apex:form id="formId">
+        <apex:pageMessages escape="false"/>
+        <apex:pageBlock title="Defect Edit" mode="edit" id="pageBlockId">
+            <apex:pageBlockButtons location="top" id="pageBlockButtons" >
+                
+                <apex:commandButton value="Save" action="{!save}" onclick="disableOnSubmit(this);" id="saveBtnId" rendered="{!showSave}"/>
+                <apex:commandButton value="Continue" action="{!continueSave}" rendered="{!showContinue}"/>
+                <apex:commandButton value="Cancel" action="{!cancel}" id="continueBtnId"/>
+            </apex:pageBlockButtons>         
+            <apex:pageBlockSection title="Information" columns="2">
+                <apex:inputField value="{!Defect__c.Subject__c}" required="true"/>
+                <apex:outputField value="{!caseRec.casenumber}" />
+                <apex:inputField value="{!Defect__c.Description__c}" required="true"/>
+                <apex:inputField value="{!comment.Comments__c}"/>
+                
+            </apex:pageBlockSection>  
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

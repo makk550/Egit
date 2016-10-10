@@ -1,0 +1,60 @@
+<apex:page standardcontroller="opportunity">
+     
+     <apex:detail subject="{!opportunity.Id}" relatedList="true" title="true" inlineEdit="true" showChatter="true"> 
+     </apex:detail> 
+     
+     <apex:includeScript value="{!URLFOR($Resource.JQueryUiLibrary, '/js/jquery-1.4.2.min.js')}"/>
+     <script type="text/javascript">
+        $(function(){
+            try{
+                if({!opportunity.recordtype.name == 'New Opportunity'}){
+                    $("[name='submit']").remove();
+                    $("[name='piSubmit']").remove();
+                    
+                    //$("[class='relatedProcessHistory']").remove();
+                }
+                var portalUser =  {!ISPICKVAL( $User.UserType , 'PowerPartner')};
+                var isPEROpp = {!opportunity.isPEROpp__c};
+                //alert('isPEROpp :'+isPEROpp );
+                if(portalUser){
+                    $("[name='piSubmit']").remove();
+                    $("[class='listRelatedObject opportunityLineItemBlock']").find("[class='actionColumn']").remove();
+                    $("[name='opportunitydeleteoverride']").hide();
+                    $("[name='submit_for_approval_new']").hide();
+                   // $("[name='edit']").hide();
+                    var dealRegStatus = '{!opportunity.Deal_Registration_Status__c}';
+                    if(dealRegStatus == 'New' && isPEROpp == false) {  //|| dealRegStatus == 'Deal Rejected'|| dealRegStatus == '' || dealRegStatus == null) 
+                        $("[name='opportunitydeleteoverride']").show();
+                       // alert('dealregStatus '+dealRegStatus );
+                    }
+                    if(dealRegStatus == 'New' || dealRegStatus == 'Deal Recalled'){
+                    $("[name='submit_for_approval_new']").show();
+                 //   $("[name='edit']").show();
+                    }
+                    if(dealRegStatus == 'Deal Submitted to CA'){
+                    $("[name='edit']").hide();
+                    }
+                    
+                    
+                    if({!opportunity.MinMaxErrorFormula__c != ''}){
+                        $("[name='submit_for_approval_new']").hide();
+                    }
+                    $("[class='brandTertiaryBrd first pbSubheader tertiaryPalette']").hide();
+                    $("[class='last labelCol']").first().hide(); //hide the first 
+                    $("[class='last data2Col inlineEditLock']").first().css({"color": "red"});
+                    if(isPEROpp == true){
+                       //alert ('hide minmax');
+                       $("[class='last data2Col inlineEditLock']").first().hide();
+                    }
+                    if({!opportunity.recordtype.name == 'New Opportunity'}){
+                         $("[name='submit_for_approval_new']").hide();
+                         $("[class='last data2Col inlineEditLock']").first().hide();
+                         
+                        }
+                }
+            }
+            catch(e){}
+        });
+     </script>
+     
+</apex:page>

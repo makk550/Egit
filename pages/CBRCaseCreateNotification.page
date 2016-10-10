@@ -1,0 +1,137 @@
+<apex:page standardController="Case" showHeader="false" extensions="CBRCaseCreateNotificationExtension">
+
+<apex:includeScript value="{!$Resource.cometd}"/>
+<apex:includeScript value="{!$Resource.jquery}"/>
+<apex:includeScript value="{!$Resource.json2_js}"/>
+<apex:includeScript value="{!$Resource.jquery_cometd}"/>
+      
+    <apex:includeScript value="/soap/ajax/29.0/connection.js"/>
+   <apex:includeScript value="/support/console/29.0/integration.js"/>
+    
+<script src="../../soap/ajax/29.0/connection.js" type="text/javascript"></script>
+<script src="../../soap/ajax/29.0/apex.js" type="text/javascript"></script>
+
+<!--      <LINK href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.0/themes/smoothness/jquery-ui.css" rel="stylesheet" type="text/css"/>
+     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js" /> -->
+     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js" type="text/javascript"/> 
+      <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.0/themes/smoothness/jquery-ui.css" type="text/css" /> 
+          
+
+      <script type="text/css">
+      .ui-widget-content.ui-dialog
+        {
+           border: 2px solid #DDD;
+        }
+      </script>
+
+<script type="text/javascript">      
+
+        function openpopup(message){
+            console.log('message:'+message);
+
+             $("#popup1").dialog({
+                    autoOpen: false,
+                    modal: true,
+                    buttons : {
+                        'Ok': function(){
+                            $("#popup1").dialog('close');
+                            //goToDetailPage();
+                        }
+                    }               
+                });
+
+             $("#popup1").dialog("open");
+           // $("#caseInfo").text('A case with case number:'+message.data.sobject.CaseNumber);
+
+
+
+        }
+
+(function($)  
+ {  
+
+     $(document).ready(function() {
+         console.log('Initiated');
+
+         /* $("#popup1").dialog({
+                    autoOpen: false,
+                    modal: true,
+                    buttons : {
+                        'Ok': function(){
+                            $("#popup1").dialog('close');
+                            //goToDetailPage();
+                        }
+                    }               
+                });
+*/
+        // $("#popup1").dialog("open");
+        // $("#caseInfo").text('A case with case number:');
+        /* sforce.connection.sessionId = "{!$Api.Session_ID}";
+         var currentUserId = sforce.connection.getUserInfo().userId
+         console.log('current user id:'+ currentUserId); */
+         
+         $.cometd.init({                  
+             url: window.location.protocol+'//'+window.location.hostname+'/cometd/24.0/',  
+             requestHeaders: { Authorization: 'OAuth {!$Api.Session_ID}'},
+             appendMessageTypeToURL : false
+         }); 
+         
+        $.cometd.subscribe('/topic/CBRCaseCreateNotification', function(message)  
+        {  
+            console.log('Case Created By:'+message.data.sobject.CreatedByID);        
+          	var caseno = message.data.sobject.CaseNumber;
+            var product = message.data.sobject.Product__c ;
+            var sitename = message.data.sobject.Site_Name__c;
+            
+            alert("\t\t\t\tATTENTION: \nProduct  :     " + message.data.sobject.Product__c +
+                  "\nCase Number :     " + message.data.sobject.CaseNumber + " has been created by \n"+
+                  message.data.sobject.Site_Name__c  + " that requires immediate attention");
+              
+            //alert('In subscribe');
+            // sforce.console.setCustomConsoleComponentWindowVisible(true);
+            // alert('after visible');
+            
+            //alert(message.data.sobject.CaseNumber +'</b> and severity '+message.data.sobject.Severity__c +' has been created '+ 
+            //  '\n on product: '+ message.data.sobject.Product__c+ ' and has CBR feature enabled'); 
+            
+            
+            
+            //$("#popup1").dialog("open");
+            // $("#caseInfo").text('A case with case number:'+message.data.sobject.CaseNumber +'and severity '+message.data.sobject.Severity__c +' has been created '+ 
+            //    '\\n on product: '+ message.data.sobject.Product__c+ ' and has CBR feature enabled');
+            //  openpopup(message);
+        }); 
+ 
+
+/*             CBRCaseCreateNotificationExtension.fetchUsers(function(result,event){
+             console.log('result.length:'+result.length);
+             console.log('result:'+result);     
+             for(i=0;i<result.length;i++){
+                 if(result[i] == currentUserId){    
+                     console.log('In current user block, before subscribe');
+                     $.cometd.subscribe('/topic/CBRCaseCreateNotification', function(message)  
+                                        {  
+                                            //alert('In cometd.subscribe');
+                                            //getCaseCreatedBy(message.data.sobject.CreatedByID);
+                                            //alert('Created By:'+message.data.sobject.CreatedByID);
+                                            console.log('Created By:'+message.data.sobject.CreatedByID);
+                                            alert('A case with case number:'+message.data.sobject.CaseNumber +'and severity '+message.data.sobject.Severity__c +' has been created and has CBR feature enabled'); 
+                                        }); 
+                 } 
+             }
+         });    */          
+     });  
+ })(jQuery) 
+
+</script>  
+<!--
+<apex:form >
+    <apex:actionFunction action="{!fetchUsers}" name="getUsersTeam"/>
+</apex:form> 
+-->
+<div id= "popup1">
+    <div id="caseInfo"> </div>
+ </div>
+
+
+</apex:page>

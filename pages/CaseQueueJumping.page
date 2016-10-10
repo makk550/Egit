@@ -1,0 +1,22 @@
+<apex:page standardController="Case" showHeader="false">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js" />
+    <script type="text/javascript">
+        document.ready = function (){
+        //alert('In alert');
+        var caseQueueJumpingEnabled = "{!case.Certified_Bypass_Routing_Qualified__c}";
+        //console.log('out of if, Certified_Bypass_Routing_Qualified__c:'+caseQueueJumpingEnabled);
+        if(caseQueueJumpingEnabled == 'true'){
+            //console.log('in if, Certified_Bypass_Routing_Qualified__c:'+caseQueueJumpingEnabled);
+            alert('Certified Bypass Routing Enabled for this case');
+        }
+    }
+    </script>
+    
+    <!--
+    <apex:form>
+        <span style="color:red; font-weight: bold;align :center">
+            <apex:outputText rendered="{!Case.Certified_Bypass_Routing_Qualified__c}" > Certified Bypass Routing is enabled for this case </apex:outputText>
+        </span>
+    </apex:form> -->
+    
+</apex:page>

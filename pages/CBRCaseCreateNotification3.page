@@ -1,0 +1,135 @@
+<!-- 
+        
+        
+    
+    
+    <apex:includeScript value="{!$Resource.cometd}"/>
+    <apex:includeScript value="{!$Resource.jquery}"/>
+    <apex:includeScript value="{!$Resource.json2_js}"/>
+    <apex:includeScript value="{!$Resource.jquery_cometd}"/>
+    <script src="../../soap/ajax/29.0/connection.js" type="text/javascript"></script>
+    <script src="../../soap/ajax/29.0/apex.js" type="text/javascript"></script>
+    
+    <apex:stylesheet value="{!URLFOR($Resource.SLDS103, 'assets/styles/salesforce-lightning-design-system-vf.css')}" />
+    
+    <script type="text/javascript">      
+    
+    (function($)  
+     {  
+         
+         $(document).ready(function() {
+             console.log('Initiated');
+             /*
+             $.cometd.init({                  
+                 url: window.location.protocol+'//'+window.location.hostname+'/cometd/24.0/',  
+                 requestHeaders: { Authorization: 'OAuth {!$Api.Session_ID}'},
+                 appendMessageTypeToURL : false
+             }); 
+             
+             $.cometd.subscribe('/topic/CBRCaseCreateNotification', function(message)  
+                                {  
+                                    console.log('Case Created By:'+message.data.sobject.CreatedByID);        
+                                    
+                                    alert('A case with case number:'+message.data.sobject.CaseNumber +'and severity '+message.data.sobject.Severity__c +' has been created '+ 
+                                          '\n on product: '+ message.data.sobject.Product__c+ ' and has CBR feature enabled'); 
+                                    
+                                    //$("#popup1").dialog("open");
+                                    $("#caseInfo").text('A case with case number:'+message.data.sobject.CaseNumber +'and severity '+message.data.sobject.Severity__c +' has been created '+ 
+                                                        '\n on product: '+ message.data.sobject.Product__c+ ' and has CBR feature enabled');
+                                    openpopup(message);
+                                });  
+                                */
+             
+         });  
+     })(jQuery) 
+    
+    </script>  
+
+    <div id= "popup1">
+        <div id="caseInfo"> </div>
+    </div>
+    
+    
+    
+</apex:page>  -->
+
+
+
+
+<apex:page showHeader="false" standardStylesheets="false" sidebar="false" applyHtmlTag="false" applyBodyTag="false" docType="html-5.0">    
+
+<html xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">    
+    
+    <apex:includeScript value="{!$Resource.cometd}"/>
+    <apex:includeScript value="{!$Resource.jquery}"/>
+    <apex:includeScript value="{!$Resource.json2_js}"/>
+    <apex:includeScript value="{!$Resource.jquery_cometd}"/>
+    <script src="../../soap/ajax/29.0/connection.js" type="text/javascript"></script>
+    <script src="../../soap/ajax/29.0/apex.js" type="text/javascript"></script>
+    
+    <script type="text/javascript">
+    	(function($)  
+     	{
+            $(document).ready(function(){
+            	console.log('Initated slds');
+                $( "div[role='dialog']").removeClass('slds-fade-in-open')
+            
+                $.cometd.init({                  
+                     url: window.location.protocol+'//'+window.location.hostname+'/cometd/24.0/',  
+                     requestHeaders: { Authorization: 'OAuth {!$Api.Session_ID}'},
+                     appendMessageTypeToURL : false
+                 });
+                $.cometd.subscribe('/topic/CBRCaseCreateNotification', function(message)  
+                {
+                    console.log('In subscribe...');
+                    console.log('case number:'+message.data.sobject.CaseNumber);                   
+                    alert('case number:'+message.data.sobject.CaseNumber);
+                     $( "div[role='dialog']").addClass('slds-fade-in-open');
+                });
+                console.log('after subscribe');
+            });
+        })(jQuery) 
+    </script>
+
+<head>
+  <apex:stylesheet value="{!URLFOR($Resource.SLDS103, 'assets/styles/salesforce-lightning-design-system-vf.css')}" />
+</head>    
+
+<body>    
+
+  <!-- REQUIRED SLDS WRAPPER -->
+  <div class="slds">  
+   
+<div class="slds-modal slds-fade-in-open" aria-hidden="false" role="dialog"> 
+    <div class="slds-modal__container">
+      <div class="slds-modal__header">
+        <button class="slds-button slds-button--icon-inverse slds-modal__close">
+          <svg aria-hidden="true" class="slds-button__icon slds-button__icon--large">
+            <use xlink:href="/assets/icons/action-sprite/svg/symbols.svg#close"></use>
+          </svg>
+          <span class="slds-assistive-text">Close</span>
+        </button>
+        <h2 class="slds-text-heading--medium">Modal Header</h2>
+      </div>
+      <div class="slds-modal__content slds-p-around--medium">
+        <div>
+          <p>Test data
+				testing...
+          </p>
+        </div>
+      </div>
+      <div class="slds-modal__footer">
+        <button class="slds-button slds-button--neutral">OK</button>
+      </div>
+    </div>
+  </div>
+  <div class="slds-backdrop slds-backdrop--open"></div>
+
+  </div>
+  <!-- / REQUIRED SLDS WRAPPER -->    
+    
+    
+
+</body>
+</html>
+</apex:page>

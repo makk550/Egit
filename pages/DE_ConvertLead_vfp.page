@@ -1,0 +1,200 @@
+<apex:page standardController="Lead" extensions="DE_ConverLead_cls" id="customconvertleadpageid" action="{!CheckIsConverted}">
+    <script>
+        var newWin;
+        window.onload=function()
+        {
+            //alert("{!leadrec.Commercial_Account__r.Name}");
+            var accountName = "{!leadrec.Commercial_Account__r.Name}";
+            //alert(accountName);
+            //var accountId = "{!leadrec.Commercial_Account__c}";
+            
+            //Fill in Account Name
+            if(document.getElementById("{!$Component.customconvertleadpageid:theForm:hdnAccountName}").value != null)
+                document.getElementById('targetName').innerHTML = document.getElementById("{!$Component.customconvertleadpageid:theForm:hdnAccountName}").value;
+            else if(accountName != '')
+                document.getElementById('targetName').innerHTML = accountName;
+            else
+                document.getElementById('targetName').innerHTML = '';
+                //alert(document.getElementById('targetName').innerHTML);
+        }
+        
+        function showhidecomponents()
+        {
+            document.getElementById("{!$Component.customconvertleadpageid:theForm:theBlock:pgblkConvertLeadid:pgblkConvertLeadid_4:opprnametextid}").disabled = document.getElementById("{!$Component.customconvertleadpageid:theForm:theBlock:pgblkConvertLeadid:pgblkConvertLeadid_4:chkoptyid}").checked;
+            if(document.getElementById("{!$Component.customconvertleadpageid:theForm:theBlock:pgblkConvertLeadid:pgblkConvertLeadid_4:chkoptyid}").checked)
+                document.getElementById("{!$Component.customconvertleadpageid:theForm:theBlock:pgblkConvertLeadid:pgblkConvertLeadid_4:opprnametextid}").value = '';
+            else 
+                document.getElementById("{!$Component.customconvertleadpageid:theForm:theBlock:pgblkConvertLeadid:pgblkConvertLeadid_4:opprnametextid}").value = "{!opprName}";    
+        }
+        function openLookupPopup(searchPage,name, id,lid)  {
+            var url="/apex/" + searchPage + "?namefield=" + name + "&idfield=" + id + "&lid=" + lid;// + "&frompage=fromlead";   
+            newWin=window.open(url, 'Popup','height=500,width=1000,left=100,top=100,resizable=no,scrollbars=yes,toolbar=no,status=no');   
+            if (window.focus)    {
+                newWin.focus();   
+            }
+            return false;    
+        }
+        function closeLookupPopup()  
+        {     
+            //Added today
+            if (null!=newWin)     
+            {        
+                newWin.close();     
+            }    
+        }    
+        function validateFields()    {
+            var isOpptycreate = document.getElementById("{!$Component.customconvertleadpageid:theForm:theBlock:pgblkConvertLeadid:pgblkConvertLeadid_4:chkoptyid}").checked;
+            //alert(document.getElementById("{!$Component.customconvertleadpageid:theForm:theBlock:pgblkConvertLeadid:pgblkConvertLeadid_4:opprnametextid}").value);
+            if(document.getElementById("{!$Component.theForm.hdnAccountID}").value == '') {
+                alert('Please Select an Account'); 
+                return false; 
+            }    
+            else if(document.getElementById("{!$Component.customconvertleadpageid:theForm:theBlock:pgblkConvertLeadid:pgblkConvertLeadid_4:opprnametextid}").value == '' && !isOpptycreate) {
+                alert('Please Enter Opportunity Name');
+                return flase;
+            }    
+            else {
+                //doConvert();
+                doCheckContacts();
+            }    
+        }
+        function backfunc() {
+            switchblocks();
+        }    
+
+    </script>
+<apex:pageMessages ></apex:pageMessages>
+    <apex:form id="theForm">
+        <!--<apex:actionFunction name="doConvert" action="{!ConvertLeadRecord_1}" />-->
+        <apex:actionFunction name="doCheckContacts" action="{!checkContacts}" />
+        <apex:pageBlock id="theBlock" mode="edit" rendered="{!isConvertLeadBlock}">
+            <apex:pageblockButtons >
+                <apex:commandButton value="Convert" onclick="validateFields(); return false;"/>
+                <apex:commandButton value="Cancel" action="{!cancelMeth}"/>    
+            </apex:pageblockButtons>
+            <apex:pageBlockSection columns="1" title="Convert Lead" id="pgblkConvertLeadid">
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Record Owner"/>
+                    <apex:inputField value="{!leadrec.ownerid}"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Send Email to the Owner" />
+                    <apex:inputcheckbox value="{!IsSendEmailChecked}"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageblockSectionItem >
+                <apex:outputLabel value="Account Name" />
+                <apex:outputPanel styleClass="requiredInput" layout="block" >
+                    <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+                    <div id="targetName" style="float:left;font-size:12px"></div>  &nbsp; 
+                        <a href="#" onclick="openLookupPopup('DE_AccSearch_VFP','{!$component.theForm.hdnAccountName}', '{!$component.theForm.hdnAccountID}', '{!leadrec.id}'); return false">
+                        <!--<a href="#" onclick="openLookupPopup('CAEndUserAccountSearch','{!$Component.hdnAccountName}', '{!$Component.hdnAccountID}'); return false">-->                   
+                            <img title="Account Name Lookup (New Window)" class="lookupIcon" alt="Account Name Lookup (New Window)" src="/s.gif"/>                 
+                        </a>                         
+                </apex:outputPanel>
+            </apex:pageblockSectionItem>    
+  
+            <apex:pageblockSectionItem id="pgblkConvertLeadid_4">
+                <apex:outputLabel value="Opportunity Name" id="Opptylabelid"/>
+                <apex:outputPanel >
+                     <apex:outputPanel styleClass="requiredInput" layout="block" id="optyoutputpanelid">
+                        <apex:outputPanel styleClass="requiredBlock" layout="block" />
+                        <apex:outputpanel >
+                            <apex:inputtext value="{!opprName}" id="opprnametextid"/><br/>
+                        </apex:outputpanel>                      
+                     </apex:outputPanel>
+                     <apex:outputPanel >
+                             <apex:inputcheckbox value="{!isOpportunityCreate}" id="chkoptyid" onclick="showhidecomponents();"/>
+                            <apex:outputlabel value="Do not create a new opprtunity upon conversion" />                                  
+                    </apex:outputPanel> 
+                 </apex:outputPanel>    
+            </apex:pageblockSectionItem>
+            <apex:pageblockSectionItem >
+                <apex:outputLabel value="Converted Status"/>
+                <apex:selectList value="{!selctedConvertedStatus}" size="1" onchange="RTMTypeValues()">
+                        <apex:selectOptions value="{!ConvertedStatusList}"></apex:selectOptions>
+                </apex:selectList>
+            </apex:pageblockSectionItem>
+            </apex:pageBlockSection>    
+            <apex:pageBlockSection columns="2" title="Task Information">
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Subject"/>
+                    <apex:inputField value="{!taskrec.Subject}"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Due Date"/>
+                    <apex:inputField value="{!taskrec.ActivityDate}"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Type"/>
+                    <apex:inputField value="{!taskrec.Type}"/>        
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Status"/>
+                    <apex:inputField value="{!taskrec.Status}"/>        
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Priority"/>
+                    <apex:inputField value="{!taskrec.Priority}"/>        
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection columns="1" title="Task Information">
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Comments"/>
+                    <apex:inputField value="{!taskrec.Description}" style="width:420px;height:80px"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputpanel id="commnentsid">
+                        <apex:inputcheckbox value="{!setSendNotificationEmail}"/>
+                        <apex:outputLabel value="Send Notification Email" />
+                    </apex:outputpanel>    
+                </apex:pageBlockSectionItem>    
+            </apex:pageBlockSection>
+            <apex:pageBlockSection columns="2" title="Reminder">
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Reminder"/>
+                    <apex:outputPanel id="reminderpanelid">
+                        <apex:outputLabel value=""></apex:outputLabel>
+                        <apex:inputcheckbox value="{!taskrec.IsReminderSet}"/>
+                        <apex:inputField value="{!taskrec.ReminderDateTime}"/>
+                    </apex:outputPanel>
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+        </apex:pageBlock>        
+        
+        <apex:inputHidden id="hdnAccountName" value="{!endUserAccountName}"/>
+        <apex:inputHidden id="hdnAccountID" value="{!hdnAccountId}"/>
+
+        <!--Contact Block-->
+        <apex:pageBlock title="Convert Lead" rendered="{!isContactBlock}" mode="edit">
+            <apex:pageBlockSection columns="1" title="Contacts">
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Account Name" />
+                    <apex:outputText value="{!endUserAccountName}" />
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Contact Name" />
+                    <apex:outputPanel styleClass="requiredInput" layout="block" >
+                        <apex:outputPanel styleClass="requiredBlock" layout="block" />
+                        <apex:selectList value="{!selectedContact}" size="1">
+                            <apex:selectOptions value="{!contactPickList}"></apex:selectOptions>
+                        </apex:selectList>
+                    </apex:outputPanel>
+                </apex:pageBlockSectionItem> 
+        </apex:pageBlockSection>    
+                
+        <apex:pageBlockButtons >
+        <apex:commandButton value="Convert" action="{!ConvertLeadRecord_1}" />
+        <apex:commandButton value="Back" onclick="backfunc"/>
+        <apex:actionfunction name="switchblocks" action="{!switchBlock}"/>
+        </apex:pageBlockButtons> 
+        </apex:pageBlock>
+        
+    </apex:form>
+
+</apex:page>

@@ -1,0 +1,22 @@
+<apex:page standardController="Case" extensions="CaseCreateSampleControllerExtension" title="CaseCreateSample">
+    <apex:sectionHeader title="Case" />
+    <apex:form >
+        
+        <apex:pageBlock >
+                
+                <apex:pageBlockSection title="Case Information" columns="2">                   
+                    
+                        <apex:inputField value="{!caseRec.caseNumber}" rendered="{!isEditing}"/>                   
+                         <apex:pageblockSectionItem rendered="{!isEditing}"></apex:pageblockSectionItem>
+                        <apex:inputfield value="{!caseRec.Site_Association__c}" required="true"/>
+                        <apex:inputField value="{!caseRec.Severity__c}" required="true"/>
+                        <apex:inputField value="{!caseRec.CA_Product_Controller__c}" required="true"/>
+                        <apex:pageblockSectionItem ></apex:pageblockSectionItem>
+                        <apex:inputField value="{!caseRec.CA_Product_Component__c}" required="true"/> 
+                                    
+                </apex:pageBlockSection>    
+        </apex:pageBlock>
+    
+    </apex:form>
+
+</apex:page>

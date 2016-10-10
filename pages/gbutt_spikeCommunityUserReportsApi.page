@@ -1,0 +1,12 @@
+<apex:page controller="gbutt_spikeCommunityUserReportsApi">
+
+  <apex:form >
+    <apex:commandButton action="{! reportApi }" value="Report API" />
+    <apex:commandButton action="{! namedCredential }" value="Named Credential" />
+  </apex:form>
+
+  <pre>
+    {! reportData }
+  </pre>
+	
+</apex:page>

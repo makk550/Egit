@@ -1,0 +1,215 @@
+<apex:page standardController="Case" extensions="Jive_CreateCaseController" showHeader="false" sidebar="false" id="caseCreatePage" standardStylesheets="true">
+<!-- <apex:page standardController="case" extensions="Jive_CreateCaseController" standardStylesheets="false" showHeader="false" sidebar="false"> -->
+<head>
+	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"></link>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+	<style>
+		 .inputField{
+			  width: 97%;
+			  height: 34px;
+			  padding: 6px 12px;
+			  font-size: 14px;
+			  line-height: 1.42857143;
+			  color: blue;
+			  background-color: blue;
+			  border-radius: 4px;
+		   }
+
+		   .top-buffer { margin-top:20px; }
+
+		   .buttonStyle {
+		   	background-color:blue;
+			font-weight:bold;
+		    }
+		    .btn {
+    padding: 14px 24px;
+    border: 0 none;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    background-color:#337ab7;
+	}
+  a:link, a:visited {
+  color: red;
+  }
+
+/*.btn:focus, .btn:active:focus, .btn.active:focus {
+    outline: 0 none;
+}
+
+.btn-primary {
+    background: #0099cc;
+    color: #ffffff;
+}
+
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active, .btn-primary.active, .open > .dropdown-toggle.btn-primary {
+    background: #33a6cc;
+}
+
+.btn-primary:active, .btn-primary.active {
+    background: #007299;
+    box-shadow: none;
+}*/
+	</style>
+</head>
+
+<div class = "container-fluid">
+	<div class="panel panel-primary">
+	      <div class="panel-heading">
+	        <h3 class="panel-title" >New Case</h3>
+	      </div>
+	      <div class="panel-body">
+	        <apex:form id="createCaseForm">
+
+	        <div class="row">
+	        	<div class="col-sm-4">
+					Logged in as: {! $User.FirstName + ' ' + $User.LastName }
+				</div>
+			</div>
+
+	        <div class="row top-buffer">
+	        	<div class="col-sm-4">
+		            <div class="form-group">
+		                <label for="Subject">Subject *</label>
+		                <apex:inputField value="{!case.Subject }" styleClass="form-control"  id="inputSubject" required="true"/>
+		            </div>
+		            <div class="form-group">
+		                <label for="Severity__c">Severity *</label>
+		                <apex:inputField value="{!case.Severity__c }" styleClass="form-control case-severity" required="true"/>
+		            </div>
+
+
+					     <div class="form-group">
+		                <label for="Description" id="lblDescription">Description *</label>
+		                <apex:inputTextarea value="{!case.Description}" styleClass="form-control" id="inputDescription" label="lblDescription"/>
+		               <font color="#d74c3b"> <apex:outputText rendered="{! descriptionVisible}" id="lblDescripError" ><strong>Error:</strong> You must enter a value</apex:outputText></font>
+		            </div>
+
+	           		 <div class="form-group">
+		                <label for="Company">Business Impact</label>
+		                <apex:inputField value="{!case.Business_Impact__c }" styleClass="form-control"/>
+		            </div>
+
+		     	</div>
+				<div class="col-sm-4 col-sm-offset-1">
+		            <div class="form-group">
+		                <label >Product Release Selection</label>
+		                <apex:inputText styleClass="form-control" value="{! productReleaseSelection}"/>
+		            </div>
+		             <div class="form-group">
+		                <label>Product Operating System</label>
+		                <apex:inputText styleClass="form-control" value="{! productOperatingSystem}"/>
+	        		 </div>
+		            <div class="form-group">
+		                <label>Product Service Pack </label>
+		                <apex:inputText styleClass="form-control" value="{! productServicePack}"/>
+		            </div>
+		        
+		        </div>
+		    </div>
+
+	        <div class="row top-buffer">
+	          	<div class="col-sm-5 col-sm-offset-4">
+	            	<apex:commandButton value="Submit"  action="{! createCase}" />	            
+	            	<!-- <input type="submit" id="addComment" value="test button" disabled="disabled" /> -->
+	            </div>
+	        </div>
+
+
+
+	        </apex:form>
+	       </div>
+	    </div>
+
+   </div>
+
+    <span data-iframe-height="">&nbsp;</span>
+   	<c:jQuery />
+    <script>
+          var opts = j$('.case-severity option[value="1"]');
+          if (opts.length > 0) {
+            opts.remove();
+          }
+    </script>
+
+
+<script type="text/javascript">
+
+	function testComplete(){
+		var caseId = '{!testString}';
+		alert(caseId);
+		// window.location = "/customer/Jive_ViewSingleCase?id={!myCaseId}";
+	}
+</script>
+
+<script type="text/javascript">
+
+function testProperty(){
+	var sample = '{!testString}';
+	alert(sample);
+}
+
+</script>
+    <script type="text/javascript">
+
+
+
+    	// function notFunctional(){
+     //  		alert('Submit button is not functional');
+   		// }
+   		function verifyRequired(){
+   			var tempSub = document.getElementById('{!$Component.caseCreatePage.createCaseForm.inputSubject}').value;
+    		var tempDesc = document.getElementById('{!$Component.caseCreatePage.createCaseForm.inputDescription}').value;
+
+   			if(tempSub == '' || tempDesc == ''){
+   				alert('Fill out all *required  fields ');
+   				// document.getElementById('lblDescripError').style.display = 'block';
+   				document.getElementById('lblDescripError').hidden = false;
+          return false;
+   			}
+   		}
+
+    </script>
+
+
+ <script type="text/javascript">
+//Method to get static text from the controller
+//Sends no parameters to the controller method
+    function getText() {
+      var text = "";
+      JSRemotingBasicsController.doGetText(
+        function(result, event) {
+          if(event.type === 'exception') {
+            console.log("exception");
+            console.log(event);
+          } else if (event.status) {
+            text = result;
+            document.getElementById('textResponseSpan').innerHTML = text;
+            document.getElementById('{!$Component.page.textResponseApexOutputText}').innerHTML = text;
+          } else {
+            console.log(event.message);
+          }
+        }
+      );
+    }
+  </script>
+
+
+
+    <c:jQuery />
+
+
+    <script type="text/javascript" src="{! URLFOR( $Resource.JiveTurkey, 'js/iframe-resizer/iframeResizer.contentWindow.min.js' ) }"></script>
+
+
+<!--     <c:jQuery />
+
+    <script>
+   		j$(".user").remove();
+    </script> -->
+
+
+
+
+</apex:page>

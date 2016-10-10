@@ -1,0 +1,49 @@
+<apex:page id="PG" controller="StreamingAPIController">  
+<apex:form id="FRM">  
+  
+    <apex:includeScript value="{!$Resource.StreamingAPIJqueryCometd}"/>  
+    <apex:includeScript value="{!$Resource.StreamingAPIJSON}"/>  
+    <apex:includeScript value="{!$Resource.StreamingAPIJquery}"/>  
+    <apex:includeScript value="{!$Resource.StreamingAPICometd}"/>  
+  
+    <apex:actionFunction name="GetRefreshedCases" reRender="PB,PBT"/>  
+  
+    <script type="text/javascript">  
+        (function($)  
+        {  
+            $(document).ready(function() {  
+                  
+                // Connect to the CometD endpoint  
+                $.cometd.init({  
+                    url: window.location.protocol+'//'+window.location.hostname+'/cometd/24.0/',  
+                    requestHeaders: { Authorization: 'OAuth {!$Api.Session_ID}'}  
+                });  
+                  
+                // Subscribe to a topic. JSON-encoded update will be returned in the callback  
+                // In this example we are using this only to track the generated event  
+                $.cometd.subscribe('/topic/CheckCaseStatus', function(message)  
+                {  
+                    //You can use message as it will return you many attributes  
+                    //I am just using to track that event is generated  
+                    GetRefreshedCases();  
+                });  
+  
+            });  
+        })(jQuery)  
+    </script>  
+  
+    <apex:pageBlock id="PB">  
+        <apex:variable var="count" value="{!0}" />  
+        <apex:pageBlockTable id="PBT" value="{!getRefreshedCases}" var="AllAcc">  
+              
+            <apex:column headerValue="S.No.">  
+                <apex:variable var="count" value="{!count+1}" />  
+                {!count}  
+            </apex:column>  
+            <apex:column value="{!AllAcc.Subject }" headerValue="Subject "/>  
+              
+        </apex:pageBlockTable>  
+    </apex:pageBlock>  
+  
+</apex:form>  
+</apex:page>

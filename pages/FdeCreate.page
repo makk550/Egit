@@ -1,0 +1,202 @@
+<apex:page showHeader="false" sidebar="false" standardStylesheets="false" applyBodyTag="false" applyHtmlTag="false" docType="html-5.0">
+<html ng-app="app">
+
+<head>
+  <title>Create FDE Org</title>
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"></link>
+</head>
+
+<body>
+  <h1>Create Flowdock Enterprise Org</h1>
+  <div class="container">
+    <fde-create>Loading...</fde-create>
+  </div>
+  <hr />
+  <script src="//code.jquery.com/jquery-2.2.4.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.7/angular.min.js"></script>
+
+  <script type="text/javascript">
+    (function() {
+      'use strict';
+      var app = angular.module('app', []);
+      app.component('fdeCreate', {
+        templateUrl: 'create.tpl.html',
+        controller: function(fdeService) {
+          var ctrl = this;
+          ctrl.fdeOrg = new FdeOrg('UE');
+          ctrl.onSubmit = function() {
+            ctrl.fdeOrg.cleanup();
+            console.log(ctrl.fdeOrg);
+            // createFdeOrg();
+          }
+
+          function createFdeOrg() {
+            fdeService.createFdeSubscription(ctrl.fdeOrg)
+              .then(function(result) {
+                console.log(result);
+              })
+              .catch(function(err) {
+                console.error(err);
+              });
+          }
+        }
+      });
+
+      app.service('fdeService', function($q) {
+        var svc = this;
+        var controllerName = 'CreateFdeOrgController';
+        var options = {};
+        svc.createFdeSubscription = function(fdeOrg) {
+          return createFdeOrgVfr(fdeOrg);
+        };
+
+        function createFdeOrgVfr(fdeOrg) {
+          var deferred = $q.defer();
+          Visualforce.remoting.Manager.invokeAction(controllerName + '.createFdeOrg', fdeOrg, options, handleResult);
+          return deferred;
+
+          function handleResult(result, event) {
+            $log.debug(result);
+            if (event.status) {
+              deferred.resolve(result);
+            } else {
+              console.error(event);
+              deferred.reject(event);
+            }
+          }
+        }
+      });
+
+      function FdeOrg(alm_subscription_type) {
+        this.alm_subscription_type = alm_subscription_type;
+        this.cleanup = function() {
+          if (this.alm_subscription_type === 'UE') {
+            this.paid_standalone_seats = undefined;
+            this.unpaid_standalone_seats = undefined;
+          } else {
+            this.max_ue_seats = undefined;
+            this.paid_addon_seats = undefined;
+            this.unpaid_addon_seats = undefined;
+          }
+          if (!this.trial) {
+            this.closes_at = undefined;
+          }
+        };
+      }
+    })();
+  </script>
+
+  <script type="text/ng-template" id="create.tpl.html">
+    <form name="cForm" ng-submit="$ctrl.onSubmit()">
+      <div class="container-fluid">
+        <div class="row">
+          <!-- FDE Subscription Name -->
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>FDE Subscription Name</label>
+              <input type="text" class="form-control" ng-model="$ctrl.fdeOrg.name" required>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <!-- Admin Email -->
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>Admin Email</label>
+              <input type="email" class="form-control" ng-model="$ctrl.fdeOrg.admin_email" required>
+            </div>
+          </div>
+          <!-- Admin Name -->
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>Admin Name</label>
+              <input type="text" class="form-control" ng-model="$ctrl.fdeOrg.admin_name" required>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <!-- Is Trial -->
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>Is Trial</label>
+              <input type="checkbox" class="form-control" ng-model="$ctrl.fdeOrg.trial">
+            </div>
+          </div>
+          <!-- Trial Expiration Date -->
+          <div class="col-md-6" ng-if="$ctrl.fdeOrg.trial">
+            <div class="form-group">
+              <label>Trial Expiration Date</label>
+              <input type="date" class="form-control" ng-model="$ctrl.fdeOrg.closes_at" required>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <!-- FDE Edition -->
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>FDE Edition</label>
+              <select class="form-control" ng-model="$ctrl.fdeOrg.alm_subscription_type" required>
+          <option>UE</option>
+          <option>Standalone</option>
+        </select>
+            </div>
+          </div>
+        </div>
+        <div class="row" ng-if="$ctrl.fdeOrg.alm_subscription_type === 'UE'">
+          <!-- Rally Sub ID -->
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>Rally Sub ID</label>
+              <input type="number" class="form-control" ng-model="$ctrl.fdeOrg.alm_subscription_id" required>
+            </div>
+          </div>
+          <!-- Rally UE Seats -->
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>Rally UE Seats</label>
+              <input type="number" class="form-control" ng-model="$ctrl.fdeOrg.max_ue_seats" required>
+            </div>
+          </div>
+          <!-- Paid Addon Seats -->
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>Paid Addon Seats</label>
+              <input type="number" class="form-control" ng-model="$ctrl.fdeOrg.paid_addon_seats" required>
+            </div>
+          </div>
+          <!-- Unpaid Addon Seats -->
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>Unpaid Addon Seats</label>
+              <input type="number" class="form-control" ng-model="$ctrl.fdeOrg.unpaid_addon_seats" required>
+            </div>
+          </div>
+        </div>
+        <div class="row" ng-if="$ctrl.fdeOrg.alm_subscription_type === 'Standalone'">
+          <!-- Paid Standalone Seats -->
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>Paid Standalone Seats</label>
+              <input type="number" class="form-control" ng-model="$ctrl.fdeOrg.paid_standalone_seats" required>
+            </div>
+          </div>
+          <!-- Unpaid Standalone Seats -->
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>Unpaid Standalone Seats</label>
+              <input type="number" class="form-control" ng-model="$ctrl.fdeOrg.unpaid_standalone_seats" required>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6">
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+      </div>
+    </form>
+  </script>
+</body>
+
+</html>
+</apex:page>

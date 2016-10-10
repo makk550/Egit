@@ -1,0 +1,82 @@
+<apex:page standardController="Shift__c" extensions="CalendarViewByProductController" title="CalendarView1"> <!--controller="CalendarViewController1"  -->
+    
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>    
+    
+    <script src="{!URLFOR($Resource.fullCalendar,'fullcalendar-2.9.0/lib/moment.min.js')}" />
+    <script type='text/javascript' src="{!URLFOR($Resource.fullCalendar,'fullcalendar-2.9.0/fullcalendar.min.js')}"></script>
+    <link rel="stylesheet" href="{!URLFOR($Resource.fullCalendar,'fullcalendar-2.9.0/fullcalendar.min.css')}" />
+    <script type='text/javascript' src="{!URLFOR($Resource.fullCalendar,'fullcalendar-2.9.0/gcal.js')}"></script>
+    <link href="{!URLFOR($Resource.fullCalendar,'fullcalendar-2.9.0/fullcalendar.print.css')}" rel='stylesheet' media='print' />
+        
+    <script>
+        
+         function showCalendarUI(eventsToRender){
+             //console.log(eventsToRender);
+            $('#calendar').fullCalendar({
+                    header: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'month,agendaWeek,agendaDay'
+                    },
+                    editable: false,
+                    events: JSON.parse(eventsToRender)
+             }); 
+        }
+    
+    </script>    
+    
+    <!--Styling for the calendar -->
+    <style>
+        #cal-options {float:left;}
+        #cal-legend { float:right;}
+        #cal-legend ul {margin:0;padding:0;list-style:none;}
+        #cal-legend ul li {margin:0;padding:5px;float:left;}
+        #cal-legend ul li span {display:block; height:16px; width:16px; margin-right:4px; float:left; border-radius:4px;}
+        #calendar {margin-top:20px;}
+        #calendar a:hover {color:#fff !important;}
+        
+        .fc-event-inner {padding:3px;}
+        .event-roster-primary{background:#f24d15;border-color:#f24d15;} 
+        .event-roster-secondary {background:#56458c;border-color:#56458c;}
+        .event-roster {background:#cc9933;border-color:#cc9933;}
+    </style>
+    
+    <apex:sectionHeader title="Calendar View"/>
+    <apex:outputPanel id="calPanel">
+        <apex:form >
+            <apex:pageblock title="By Product:">
+                <apex:pageblockSection columns="2">
+                    
+                    <apex:pageblockSectionItem >                           
+                        <apex:outputLabel value="Product" for="ProductID" />
+                        <apex:inputField id="ProductID"  value="{!rosterObj.CA_Product_Controller__c}">  <!-- showCalendar();showCalendarUI(); -->
+                            <apex:actionSupport event="onchange" action="{!pageLoad}" reRender="calendarBlock"  oncomplete="showCalendarUI('{!eventsJSON}')"/>
+                        </apex:inputField>                          
+                    </apex:pageblockSectionItem>
+                    
+                    <apex:pageblockSectionItem >
+                        <div id="cal-legend">
+                            <ul>
+                                <li><span class="event-roster-primary"></span>Support Role - Primary </li>
+                                <li><span class="event-roster-secondary"></span>Support Role - Secondary</li> 
+                            </ul>
+                            <div style="clear:both;"><!--fix floats--></div>
+                        </div>
+                        <div style="clear:both;"><!--fix floats--></div>
+                    </apex:pageblockSectionItem> 
+                    
+                </apex:pageblockSection>
+
+                <apex:pageblockSection columns="1" >          
+                    <apex:outputPanel id="calendarBlock"> <!-- rendered="{!displayCalendar}" -->
+                        <div id="calendar"> </div>
+                    </apex:outputPanel>                    
+                </apex:pageblockSection>
+                
+                <apex:actionFunction name="showCalendar" action="{!pageLoad}" /> <!--rerender="calendarBlock" -->
+                
+            </apex:pageblock>
+        </apex:form>
+    </apex:outputPanel>
+</apex:page>

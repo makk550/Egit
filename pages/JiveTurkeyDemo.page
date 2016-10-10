@@ -1,0 +1,38 @@
+<apex:page showHeader="false" sidebar="false" applyHtmlTag="false" applyBodyTag="false" docType="html-5.0" standardStylesheets="false">
+<html lang="en" class="no-js">
+	<head>
+		<title>Jive Turkey Demo Page</title>
+		<style type="text/css">
+			li:last-child {
+				font-weight: bold;
+			}
+		</style>
+	</head>
+
+	<body>
+
+	<p>
+		Logged in as: {! $User.FirstName + ' ' + $User.LastName }
+		</p>
+
+		<p>
+		<button type="button" onclick="grow();">Grow List</button>
+		<button type="button" onclick="shrink();">Shrink List</button>
+		<ul id="list"></ul>
+		</p>
+
+		<span data-iframe-height="">&nbsp;</span>
+		
+		<c:jQuery jQueryVersion="1.12.3" />
+		<script type="text/javascript" src="{! URLFOR( $Resource.JiveTurkey, 'js/iframe-resizer/iframeResizer.contentWindow.min.js' ) }"></script>
+		<script type="text/javascript">
+			function grow(){
+				$('#list').append('<li>New Item</li>');
+			}
+			function shrink(){
+				$('#list li:last-child').remove();
+			}
+		</script>
+	</body>
+</html>
+</apex:page>

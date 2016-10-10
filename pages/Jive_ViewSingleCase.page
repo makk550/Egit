@@ -1,0 +1,187 @@
+<!-- <apex:page extensions="Jive_ViewSingleCaseController" standardController="Case"  showHeader="false" sidebar="false" id="caseCreatePage" standardStylesheets="false"> -->
+<apex:page controller="Jive_ViewSingleCaseController"   showHeader="false" sidebar="false" id="caseCreatePage" standardStylesheets="false">
+	<head>
+	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"></link>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+	<style>
+		 .inputField{
+			  width: 97%;
+			  height: 34px;
+			  padding: 6px 12px;
+			  font-size: 14px;
+			  line-height: 1.42857143;
+			  color: blue;
+			  background-color: blue;
+			  border-radius: 4px;
+		   }
+
+		   .top-bufferLrg { margin-top:50px; }
+
+		   .top-bufferSml { margin-top:20px; }
+
+		   .side-buffer { padding-right:20px; }
+
+		   .bottomBuffer { margin-bottom: 17px; }
+
+		   .buttonStyle {
+			   	background-color:blue;
+				font-weight:bold;
+		    }
+			.btn {
+			    padding: 14px 24px;
+			    border: 0 none;
+			    font-weight: 700;
+			    letter-spacing: 1px;
+			    text-transform: uppercase;
+			    background-color:#337ab7;
+			}
+
+	</style>
+</head>
+
+
+
+			<div class = "container-fluid">
+				<div class="panel panel-primary">
+				      <div class="panel-heading">
+				        <h3 class="panel-title" >Case Details</h3>
+				      </div>
+				      <div class="panel-body">
+				        <apex:form >
+
+				        <div class="row">
+				        	<div class="col-sm-4">
+								Logged in as: {! $User.FirstName + ' ' + $User.LastName }
+							</div>
+
+              <apex:outputText rendered="{! showCaseCreatedMessage}"> Your case has been submitted successfully.
+              Your case number is {! myCaseNumber} </apex:outputText>
+						</div>
+
+
+			 			<div class="row top-bufferSml">
+						    <div class="col-sm-4">
+						            <div class="form-group">
+						                <label for="Subject">Case Number</label>
+						      				 <input type="text" class="form-control" value="{! myCase.CaseNumber}" readonly="true" />
+						            </div>
+						            <div class="form-group">
+						                <label for="Subject">Subject</label>
+						                <input type="text" class="form-control" value="{! myCase.Subject}" readonly="true" />
+						            </div>
+						            <div class="form-group">
+						                <label for="Severity__c">Severity</label>
+						                <input type="text" class="form-control" value="{! myCase.Severity__c}" readonly="true" />
+						            </div>
+						            <div class="form-group">
+						                <label for="Severity__c">Status</label>
+						               <input type="text" class="form-control" value="{! myCase.Status}" readonly="true" />
+						            </div>
+						    </div>
+
+				      		<div class="col-sm-4 col-sm-offset-1">
+
+				      				<div class="form-group">
+						                <label for="Description" class="bottomBuffer">CA Product</label>
+						                <br/>
+						                <apex:outputField value="{!myCase.CA_Product_Controller__c}" />
+
+						            </div>
+
+									<div class="form-group">
+						                <label for="Description" style="margin-top: 3px">Description</label>
+						                 <input type="text" class="form-control" value="{!myCase.Description}" readonly="true" />
+						            </div>
+
+					           		 <div class="form-group">
+						                <label for="Company">Business Impact</label>
+						                <input type="text" class="form-control" value="{!myCase.Business_Impact__c }" readonly="true" />
+						            </div>
+						             <div class="form-group">
+						                <label for="Company">Created Date/Time</label>
+						                <input type="datetime" class="form-control" value="{!myCase.CreatedDate}" readonly="true" />
+						            </div>
+						     </div>
+				         </div>
+
+				         <div class="row top-bufferSml">
+								<apex:pageBlock >
+										<apex:pageBlockButtons location="top" rendered="{! showButton}" >
+											<apex:commandButton action="{!NewComment}" value="New Comment" / >
+                     					 	<apex:commandButton value="Close Case" action="{! closeCase}" />
+                     					 	<apex:commandButton value="Reopen Case" action="{! reOpenCase}" />
+                     					 	<apex:commandButton value="Update" action="{! updateCase}"/>
+										</apex:pageBlockButtons>
+
+										<apex:pageBlockSection rendered="{! showComment}" >
+											<div class="row top-bufferLrg">
+										         	<div class="col-sm-5 col-sm-offset-2">
+														<div class="form-group">
+														    <apex:inputTextarea onkeydown="checkLimit(this,this.form.countdown,2000);" onkeyup="checkLimit(this,this.form.countdown,2000);" styleClass="form-control textComment"
+														    style="margin: 0px; width: 671px; height: 119px;"	value="{! insertComment}" id="inputComment"/>
+														   	<div ><font size="1">(Maximum characters: 2000)<input readonly="true" type="text" name="countdown" size="4" value="2000"/> </font></div>
+														</div>
+													</div>
+										    </div>
+										</apex:pageBlockSection>
+
+										<apex:pageBlockSection rendered="{! showComment}" >
+											<div class="row top-bufferSml">
+										         	<div class="col-sm-5 col-sm-offset-2">
+										            	<apex:commandButton value="Add" action="{! insertComment}" style="margin-top: 10px" styleClass="addComment" />
+
+										            </div>
+										    </div>
+										</apex:pageBlockSection>
+
+										<apex:pageBlockTable value="{!Comments}" var="comment">
+											<apex:column headerValue="Comments: "/>
+											<apex:column >
+											<apex:outputText escape="false" value="{!comment.commentText}"/>
+											</apex:column>
+										</apex:pageBlockTable>
+								</apex:pageBlock>
+				            </div>
+
+
+
+
+				        </apex:form>
+				       </div>
+				    </div>
+
+
+
+	</div>
+
+	<c:jQuery />
+	<script type="text/javascript">
+			function checkLimit(limitField, limitCount, limitNum){
+			    if (limitField.value.length > limitNum) {
+			        limitField.value = limitField.value.substring(0, limitNum);
+			    } else {
+			        limitCount.value = limitNum - limitField.value.length;
+   				}
+			}
+			
+			j$(document).ready(function(){
+		    	j$('.addComment').attr('disabled',true);
+		    	j$('.textComment').keyup(function(){
+		        	if(j$(this).val().length > 0) {
+		        		// enable button
+		            	j$('.addComment').removeAttr('disabled');
+		            	j$('.addComment').removeClass('btnDisabled');
+		            	// j$('.addComment').addClass('btn');
+		        	}
+		        	else {
+		        		// disable button
+		            	j$('.addComment').attr('disabled',true);
+		            	
+		        	}
+				});
+			});			
+
+	</script>
+
+</apex:page>

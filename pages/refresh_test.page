@@ -1,0 +1,36 @@
+<apex:page standardController="Case">
+
+     <A HREF="#" onClick="testRefreshPrimaryTabById();return false">
+         Click here to refresh a primary tab by id</A> 
+
+    <apex:includeScript value="/support/console/35.0/integration.js"/>
+    <script type="text/javascript">
+        function testRefreshPrimaryTabById() {
+            sforce.console.getFocusedPrimaryTabId(refreshPrimaryTab); 
+            closeCurrentTab();
+        }
+        var refreshPrimaryTab = function refreshPrimaryTab(result) {
+            var tabId = result.id;
+            sforce.console.refreshPrimaryTabById(tabId, true, refreshSuccess);
+        };
+    
+        var refreshSuccess = function refreshSuccess(result) {
+            //Report whether refreshing the primary tab was successful
+            if (result.success == true) {
+                alert('Primary tab refreshed successfully');
+            } else {
+                alert('Primary did not refresh');
+            }
+        };
+        
+    
+        function closeCurrentTab() {
+            sforce.console.getEnclosingTabId(closeCurrtab);
+        }   
+        var closeCurrtab = function closeCurrtab(result) {
+            var tabId = result.id;
+            sforce.console.closeTab(tabId);
+        };
+  </script>
+
+</apex:page>

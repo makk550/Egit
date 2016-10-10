@@ -1,0 +1,260 @@
+<apex:page id="opplipage" standardcontroller="OpportunityLineItem" extensions="OppLineItemcontroller" sidebar="false"> 
+    <apex:form id="form1" >
+    <apex:sectionHeader subtitle="{!oppName}" title="Add/Edit Products"/>
+    <apex:outputLink value="/{!oppId}" >Return to Opportunity </apex:outputLink>
+        <apex:pageBlock id="pb1">
+        
+            <apex:pageMessages /> 
+             <script>
+                function calculateUFLicenseFee_partner(isNonUpfront,pos)
+                 {                    
+                     if(isNonUpfront != 'false')
+                     {
+                         return false;
+                     }
+                     else
+                         calculateUFLicenseFee_action_partner(pos);                     
+                 }
+                 function calculateUFLicenseFee(isNonUpfront,pos)
+                 {
+                    
+                     if(isNonUpfront != 'false')
+                     {
+                         calculateUFLicenseFee_action(pos);
+                     }
+                     else
+                         calculateUFLicenseFee_action(pos);
+                     
+                 }
+             </script>
+            
+              <apex:actionFunction name="calculateUFLicenseFee_action" action="{!calculateUFLicenseFee}" status="myStatus" rerender="pbt1">
+                            <apex:param name="positionvalue" value="" assignTo="{!pos}" />
+             </apex:actionFunction>
+
+              <apex:actionFunction name="calculateUFLicenseFee_action_partner" action="{!calculateUFLicenseFee_Partner}" status="myStatus" rerender="pbt1">
+                            <apex:param name="positionvalue" value="" assignTo="{!pos}" />
+             </apex:actionFunction>
+                        
+           <apex:pageBlockSection id="pbs1" title="Renewal Details" rendered="{!isRenewal}">
+                <apex:inputField value="{!OpportunityLineItem.New_Deal_Term_Months__c}" id="newdealterm" required="true" />
+                <apex:inputField value="{!OpportunityLineItem.Original_CV__c}" id="origcv" />
+                <apex:inputField value="{!OpportunityLineItem.Original_Deal_Term_Months__c}" id="origdealterm" />
+                <!-- <apex:inputField value="{!OpportunityLineItem.Comfort_Term__c}" id="comfortterm" /> -->
+                <apex:inputField value="{!OpportunityLineItem.Original_Contract_IDs__c}" id="origcontractids"/>
+                <!-- <apex:inputField value="{!OpportunityLineItem.Renewal_Gap_Reason_Codes__c}" id="renewalgap"/> -->
+                <apex:inputField value="{!OpportunityLineItem.Renewal_Quota_CV__c}" id="renquota" />
+                <apex:pageblocksectionitem >
+                    <apex:outputlabel for="renbustype" value="{!$ObjectType.OpportunityLineItem.fields.Business_Type__c.label}" />
+                    <apex:outputPanel StyleClass="requiredInput" layout="block">
+                    <div class="requiredBlock"></div>
+                    <apex:selectList value="{!bustypeval}" id="renbustype" size="1" required="true">   
+                        <apex:selectOptions value="{!selbustype}"/>
+                    </apex:selectList>
+                    </apex:outputPanel>
+                </apex:pageblocksectionitem>
+                <apex:inputField value="{!OpportunityLineItem.Quote_Number__c}" id="quoteno"/>
+                <apex:inputField value="{!OpportunityLineItem.Business_Partner_ID__c}" id="busspartner"/>
+                <apex:inputField value="{!OpportunityLineItem.Contract_Number__c}" id="contractno" />
+            </apex:pageBlockSection>
+            <apex:pageBlockSection id="pbs2" title="Product Details" rendered="{!isProduct}">
+                <apex:pageBlockTable id="pbt1" value="{!lst_prd}" var="prd" rendered="{!isProduct}">
+                    <apex:column headervalue="Business Unit">
+                        <apex:selectList disabled="{!prd.isBUDisabled}" value="{!prd.strbu}" id="prd_bu" size="1"  onchange="getprds(this.value,'{!prd.position}','Product');">   
+                            <apex:selectOptions value="{!selbu}"/>
+                        </apex:selectList>
+                        <apex:actionFunction name="getprds" action="{!fetchproducts}" rerender="pbt1">
+                            <apex:param name="buvalue" value="" assignTo="{!bu_value}" />
+                            <apex:param name="positionvalue" value="" assignTo="{!pos}" />
+                            <apex:param name="familyvalue" value="" assignTo="{!prdfamily}" />
+                        </apex:actionFunction>
+                    </apex:column>
+                    <apex:column headervalue="Product">
+                        <apex:selectList disabled="{!prd.isPrdDisabled}" value="{!prd.strproduct}" id="prd_prd" onchange="getOnDemand('{!prd.position}');" size="1" >   
+                            <apex:selectOptions value="{!prd.selproduct}"/>
+                        </apex:selectList>
+                         <apex:actionFunction name="getOnDemand" action="{!recalculate}" status="myStatus" rerender="pbt1">
+                            <apex:param name="tabName" value="" assignTo="{!lineCounter}"/>
+                        </apex:actionFunction>
+                    </apex:column>
+                    <apex:column headervalue="License Type">
+                        <apex:inputField onchange="calculateUFLicenseFee('{!prd.isUFLisenceDisabled}','{!prd.position}')" value="{!prd.oppli.License__c}"/>
+                    </apex:column>
+                    <apex:column >
+                    <apex:facet name="header">
+                        {!$ObjectType.OpportunityLineItem.fields.Business_Type__c.label}
+                        </apex:facet>
+                        <apex:selectList value="{!prd.strbustype}" id="prd_bustype" size="1"  >   
+                            <apex:selectOptions value="{!prd.selprdbustype}"/>
+                        </apex:selectList>
+                           
+                    </apex:column>
+                    
+               
+                    
+                   <apex:column >
+                    <apex:facet name="header">
+                        {!$ObjectType.OpportunityLineItem.fields.UnitPrice.label}
+                    </apex:facet>
+                        <apex:inputField onchange="calculateUFLicenseFee('{!prd.isUFLisenceDisabled}','{!prd.position}')"  value="{!prd.oppli.UnitPrice}" id="prd_salesprice" />
+                    </apex:column>
+               
+                    <apex:column >
+                    <apex:facet name="header">
+                        {!$ObjectType.OpportunityLineItem.fields.Stretch__c.label}
+                        </apex:facet>
+                        <apex:inputField value="{!prd.oppli.Stretch__c}" id="prd_stretch" />
+                    </apex:column>
+                     <apex:column >
+                    <apex:facet name="header">
+                        {!$ObjectType.OpportunityLineItem.fields.Term_Month__c.label}
+                        </apex:facet> 
+                        <apex:inputField onchange="calculateUFLicenseFee('{!prd.isUFLisenceDisabled}','{!prd.position}')"  value="{!prd.oppli.Term_Month__c}" id="prd_term" />
+                    </apex:column>
+                     <apex:column rendered="false">
+                         <apex:facet name="header">
+                            <apex:outputLabel rendered="{!showOnDemandHeader}" >{!$ObjectType.OpportunityLineItem.fields.On_Demand__c.label}</apex:outputLabel> 
+                        </apex:facet> 
+                        <apex:inputCheckbox value="{!prd.on_demand}"  rendered="{!(prd.show_ondemand)}" id="prd_ondemand" />
+                    </apex:column>
+               
+              
+                <apex:column >
+                     <apex:facet name="header">
+                        {!$ObjectType.OpportunityLineItem.fields.UF_License_Fee__c.label}
+                        </apex:facet> 
+                        <apex:inputField value="{!prd.oppli.UF_License_Fee__c}" id="prd_uflic"/>
+                         <!--<apex:outputText value="{0, number, 000.00}">
+                              <apex:param value="{!prd.oppli.UF_License_Fee__c}"/>
+                          </apex:outputText>-->   
+                <script type="text/javascript">
+                    var inputElem = document.getElementById('{!$Component.prd_uflic}');
+                    inputElem.disabled=true;
+                </script>                                                
+                </apex:column>
+
+                    
+                <apex:column >
+                     <apex:facet name="header">
+                        {!$ObjectType.OpportunityLineItem.fields.Total_Maintenance__c.label}
+                        </apex:facet> 
+                       <apex:inputField value="{!prd.oppli.Total_Maintenance__c}" id="skg_totmain"/>
+                         <!--<apex:outputText value="{0, number, 000.00}">
+                              <apex:param value="{!prd.oppli.Total_Maintenance__c}"/>
+                          </apex:outputText>   --> 
+                    <script type="text/javascript">
+                        var inputElem = document.getElementById('{!$Component.skg_totmain}');
+                        inputElem.disabled=true;
+                    </script>                                               
+                </apex:column>
+               
+                 <!-- added by danva01 for Release4  -->
+<apex:column >
+                    <apex:facet name="header">
+                        {!$ObjectType.OpportunityLineItem.fields.Partner_Added__c.label}
+                    </apex:facet>                         
+                        <apex:OutputField value="{!prd.oppli.Partner_Added__c}" id="part_partner_Added" />
+                    </apex:column>
+                     <apex:column rendered="false">
+                         <apex:facet name="header">
+                            <apex:outputLabel rendered="{!showOnDemandHeader}" >{!$ObjectType.OpportunityLineItem.fields.On_Demand__c.label}</apex:outputLabel> 
+                        </apex:facet> 
+                        <apex:inputCheckbox value="{!prd.on_demand}"  rendered="{!(prd.show_ondemand)}" id="part_prd_ondemand" />
+                    </apex:column>
+             
+<!-- End -->
+
+               
+               
+               
+
+                </apex:pageBlockTable><br/>
+                <apex:commandbutton value="Add More" action="{!addmore_prds}" rerender="pbt1" rendered="{!isProduct}" />
+                </apex:pageBlockSection>
+
+
+                <apex:pageBlockSection id="pbs3" title="Details" rendered="{!isRenewal}">
+                
+                <apex:pageBlockTable id="pbt2" value="{!lst_ren}" var="ren" rendered="{!isRenewal}">
+                    <apex:column headervalue="Product Family">
+                        <apex:selectList disabled="{!ren.isFamilyDisabled}" value="{!ren.strfamily}" id="ren_fam" size="1" onchange="getbu(this.value,'{!ren.position}');">   
+                            <apex:selectOptions value="{!selfamily}"/>
+                        </apex:selectList>
+                        <apex:actionFunction name="getbu" action="{!fetchrenewalbu}" rerender="pbt2">
+                            <apex:param name="familyvalue" value="" assignTo="{!renfamily}" />
+                            <apex:param name="positionvalue" value="" assignTo="{!renpos}" />
+                        </apex:actionFunction>
+                    </apex:column>
+                    <apex:column headervalue="Business Unit">
+                        <apex:selectList disabled="{!ren.isBUDisabled}" value="{!ren.strbu}" id="ren_bu" size="1" onchange="getprds(this.value,'{!ren.position}','{!ren.strfamily}');">   
+                            <apex:selectOptions value="{!ren.selrenbu}"/>
+                        </apex:selectList>
+                        <apex:actionFunction name="getprds" action="{!fetchproducts}" rerender="pbt2">
+                            <apex:param name="buvalue" value="" assignTo="{!bu_value}" />
+                            <apex:param name="positionvalue" value="" assignTo="{!pos}" />
+                            <apex:param name="familyvalue" value="" assignTo="{!prdfamily}" />
+                        </apex:actionFunction>
+                    </apex:column>
+                    <apex:column headervalue="Product">
+                        <apex:selectList disabled="{!ren.isPrdDisabled}" value="{!ren.strproduct}" id="ren_prd" size="1" >   
+                            <apex:selectOptions value="{!ren.selproduct}"/>
+                        </apex:selectList>
+                    </apex:column>
+                    
+                    <apex:column >
+                    <apex:facet name="header">
+                        {!$ObjectType.OpportunityLineItem.fields.UnitPrice.label}
+                        </apex:facet>
+                        <apex:inputField value="{!ren.oppli.UnitPrice}" id="ren_salesprice" />
+                    </apex:column>
+                    
+                    <apex:column >
+                    <apex:facet name="header">
+                        {!$ObjectType.OpportunityLineItem.fields.Stretch__c.label}
+                        </apex:facet>
+                        <apex:inputField value="{!ren.oppli.Stretch__c}" id="ren_stretch" />
+                    </apex:column> 
+                    
+                    <apex:column >
+                    <apex:facet name="header">
+                        {!$ObjectType.OpportunityLineItem.fields.Original_Expiration_Date__c.label}
+                        </apex:facet>
+                        <apex:inputField value="{!ren.oppli.Original_Expiration_Date__c}" id="ren_exp" />   
+                    </apex:column>
+                   <!-- <apex:column >
+                    <apex:facet name="header">
+                        {!$ObjectType.OpportunityLineItem.fields.Original_Expiration_Quarter__c.label}
+                        </apex:facet>
+                        <apex:outputField value="{!ren.oppli.Original_Expiration_Quarter__c}" id="ren_exp_qtr" />
+                    </apex:column>
+                     <apex:column >
+                    <apex:facet name="header">
+                        {!$ObjectType.OpportunityLineItem.fields.Original_Expiration_Year__c.label}
+                        </apex:facet>
+                        <apex:outputField value="{!ren.oppli.Original_Expiration_Year__c}" id="ren_exp_yr" />  
+                    </apex:column>-->
+                </apex:pageBlockTable><br/>
+                <apex:commandbutton value="Add More" action="{!addmore_ren}" rerender="pbt2" rendered="{!isRenewal}" />
+            </apex:pageBlockSection>
+            <apex:pageBlockButtons location="top" >
+             <apex:actionStatus id="myStatus">
+                          <apex:facet name="start">
+                               <apex:outputPanel >
+                                                                          <apex:commandButton value="Processing..." status="myStatus" disabled="true"/>
+                                     
+                                     <div style="background-color: #dbeefd; opacity: .80; -moz-opacity: 0.80; filter:alpha(opacity=80); position: absolute; left:0;top:0; width:100%; height:100%; z-index: 3;"><apex:image value="/img/loading32.gif" style="height: 20px; position: absolute; left:50%;top:50%;"/></div>
+                                 </apex:outputPanel>
+                             </apex:facet>
+                            <apex:facet name="stop"> 
+                            <apex:outputPanel >
+                            <apex:commandButton value="Save" action="{!saveproducts}" />
+                            <apex:commandButton value="Cancel" action="{!cancel}" />
+                            </apex:outputPanel>
+                </apex:facet>
+             
+            </apex:actionStatus>   
+            </apex:pageBlockButtons>
+            
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

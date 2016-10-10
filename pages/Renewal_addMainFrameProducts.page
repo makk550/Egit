@@ -1,0 +1,33 @@
+<apex:page id="opplipage" standardcontroller="OpportunityLineItem" extensions="Renewal_addMainFrameProducts" sidebar="false">
+     <apex:form id="form1" >
+     <apex:sectionHeader subtitle="{!opportunity.name}" title="Add/Edit Mainframe Capacity"/>
+     <apex:outputLink value="/{!opportunity.Id}" >Return to Opportunity </apex:outputLink>
+        <apex:pageBlock id="pb1">
+            <apex:pageBlockButtons >
+                <apex:commandButton value="Save" action="{!saveproducts}" />
+                <apex:commandButton value="Cancel" action="{!cancel}" />
+            </apex:pageBlockButtons>
+            <apex:pageMessages ></apex:pageMessages>
+                <apex:pageBlockSection id="pbs1" title="Mainframe Capacity Details" >
+                <apex:inputField value="{!oppLineItem.unitprice}" required="True"/>
+                <apex:inputField value="{!opportunity.New_Deal_Term_months__c}" id="newdealterm" required="True" />
+                <apex:inputField value="{!oppLineItem.Stretch__c}"/>
+                <apex:inputField value="{!opportunity.Stretch_Deal_Term_Months__c}" id="stretchterm" />
+                <!--<apex:inputField value="{!opportunity.Original_CV__c}" id="origcv" />-->
+                <apex:outputField value="{!oppLineItem.Business_Type__c}"  />
+                <apex:inputField value="{!opportunity.Stretch_Sales_Price_Gap_Reason__c}" id="stretchgap"/>
+                <apex:inputField value="{!oppLineItem.Quote_Number__c}" id="qtnumber" />     
+                <apex:inputField value="{!oppLineItem.Contract_Number__c}" id="cntrctnumber" />
+                <apex:inputField value="{!opportunity.Reason_duration_is_1_year__c}" id="res" />
+                <apex:inputField value="{!opportunity.Status_at_end_of_term__c}" id="sts" />
+                 <!--<apex:pageblocksectionItem >         
+                        <apex:outputtext value="Sales Price(USD)" />
+                        <apex:outputtext value="{!salesPrice_usd}" id="SalesPrice_USD" />
+                 </apex:pageblocksectionItem>-->
+
+                <!--<apex:inputField value="{!oppLineItem.Term_Month__c}"  /> -->
+                </apex:pageblocksection>
+            </apex:pageblock>
+         </apex:form>       
+
+</apex:page>

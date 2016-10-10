@@ -1,0 +1,1 @@
+{"access_token":"00D300000006yn4!ARYAQJzj9EholTwEikn40oNen3Tw9xFZn7YFeaAUGb0Eh3LoZRmuvaAiFV06u2ubui4Xna2g5BtE7GX.eCh5ogVRjCIIxlf2","instance_url":"https://ca.my.salesforce.com","id":"https://login.salesforce.com/id/00D300000006yn4EAA/00530000003rQuJAAU","token_type":"Bearer","issued_at":"1464943376365","signature":"NNL+wF0f/Zgk8bNrYNwIsnCp02689YSfkQasUiPBcTk="}

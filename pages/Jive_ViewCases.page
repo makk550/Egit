@@ -1,0 +1,168 @@
+<apex:page standardController="Case" extensions="Jive_ViewCasesController" showHeader="false" sidebar="false" id="caseCreatePage" standardStylesheets="true">
+	<head>
+	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"></link>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+	<style>
+			.inputField{
+				  width: 97%;
+			  height: 34px;
+			  padding: 6px 12px;
+			  font-size: 14px;
+			  line-height: 1.42857143;
+			  color: blue;
+			  background-color: blue;
+			  border-radius: 4px;
+		   	}
+		  
+		   .top-buffer { margin-top:20px; }
+		  
+		   .buttonStyle { 
+		   	background-color:blue;
+			font-weight:bold;
+		    }
+		    .btn {
+			    padding: 14px 24px;
+			    border: 0 none;
+			    font-weight: 700;
+			    letter-spacing: 1px;
+			    text-transform: uppercase;
+			    background-color:#337ab7;
+			}
+			 .headerRow .TableTitle {
+				    background-color: #F0F8FF !important;
+				    background-image: none !important; 
+				    color: #CC0000 !important; 
+				    font-size:100% !important; 
+			}
+ 	</style>
+	</head>
+
+
+<!-- 	<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="#">WebSiteName</a>
+    </div>
+    <ul class="nav navbar-nav">
+      <li class="active"><a href="#">Home</a></li>
+      <li><a href="#">Page 1</a></li>
+      <li><a href="#">Page 2</a></li> 
+      <li><a href="#">Page 3</a></li> 
+    </ul>
+  </div>
+</nav> -->
+	<apex:pageBlock title="My Cases">
+		<apex:form id="theForm">
+			<apex:pageBlockSection >
+				<div>
+					Logged in as: {! $User.FirstName + ' ' + $User.LastName + $User.ContactId }					
+				</div>				
+			</apex:pageBlockSection>
+	<!-- 	<apex:panelGrid columns="2">	
+			<apex:pageBlockSection >
+				<apex:selectList value="{! selectedField}" size="1">
+					<apex:selectOption itemValue="CaseNumber" itemLabel="Case Number"/>
+					<apex:selectOption itemValue="Subject" itemLabel="Subject"/>
+					<apex:selectOption itemValue="Status" itemLabel="Status"/>
+					<apex:selectOption itemValue="Severity__C" itemLabel="Severity"/>
+					<apex:selectOption itemValue="CA_Product_Controller__c" itemLabel="Product"/>
+				</apex:selectList>
+				<apex:commandButton value="Sort Table" action="{!sortCases}" reRender="caseTable"/>			
+			</apex:pageBlockSection>
+		</apex:panelGrid>	 -->
+
+			<apex:pageBlockSection >
+				<apex:inputText id="caseNumberFilter" value="{! filterCaseNumber}" label="Case Number"/>
+				<apex:inputText id="subjectFilter" value="{! filterSubject}" label="Subject"/>
+				<apex:selectList value="{! filterStatus}" multiselect="false" size="1" label="Status">
+            		<apex:selectOptions value="{! filterStatusItems}"/>
+        		</apex:selectList><br/>
+        		<apex:selectList value="{! filterSeverity}" multiselect="false" size="1" label="Severity">
+            		<apex:selectOptions value="{! filterSeverityItems}"/>
+        		</apex:selectList>
+        		<apex:selectList value="{! filterProduct}" multiselect="false" size="1" label="Product">
+            		<apex:selectOptions value="{! filterProductItems}"/>
+        		</apex:selectList>
+        	
+        		<apex:outputText value="{! testString2}"/>	
+				
+				<apex:commandButton value="filter" action="{! setFilter}"/>
+			</apex:pageBlockSection>
+
+			<apex:pageBlockSection >
+				<apex:inputField value="{!objForStartDate.dateTimeField__c}" label="Created Start Date"/>
+				<apex:inputField value="{!objForEndDate.dateTimeField__c}" label="Created End Date"/>
+			</apex:pageBlockSection>
+
+			<apex:pageBlockSection columns="1">
+				<apex:pageBlockTable value="{!cases}" var="myCase" id="caseTable">
+		    	<!-- 	<apex:column value="{!myCase.Id}"/> -->
+		    		<apex:column >		    			
+		        		<apex:facet name="header">
+		        			<apex:commandLink action="{!ViewCases}" value="Case Number{!IF(sortExpression=='CaseNumber',IF(sortDirection='ASC','▼','▲'),'')}" id="cmdSort">
+             					<apex:param value="CaseNumber" name="column" assignTo="{!sortExpression}" ></apex:param>
+             				</apex:commandLink>
+		        		</apex:facet>
+		        		<apex:outputLink value="/apex/Jive_ViewSingleCase?id={!myCase.Id}">{!myCase.CaseNumber}</apex:outputLink>
+		    		</apex:column>
+		    		<apex:column value="{!myCase.Subject}">
+		    			<apex:facet name="header">
+							<apex:commandLink action="{!ViewCases}" value="Subject{!IF(sortExpression=='Subject',IF(sortDirection='ASC','▼','▲'),'')}">
+								<apex:param value="Subject" name="column" assignTo="{!sortExpression}" ></apex:param>
+							</apex:commandLink>
+		    			</apex:facet>
+		    		</apex:column>
+		   			<apex:column value="{!myCase.Status}" >
+		   				<apex:facet name="header">
+		   					<apex:commandLink action="{!ViewCases}" value="Status{!IF(sortExpression=='Status',IF(sortDirection='ASC','▼','▲'),'')}">
+								<apex:param value="Status" name="column" assignTo="{!sortExpression}" ></apex:param>
+							</apex:commandLink>
+		   				</apex:facet>
+		   			</apex:column>
+		   			<apex:column value="{!myCase.Severity__c}" >
+		   				<apex:facet name="header">
+		   					<apex:commandLink action="{!ViewCases}" value="Severity{!IF(sortExpression=='Severity__C',IF(sortDirection='ASC','▼','▲'),'')}">
+								<apex:param value="Severity__C" name="column" assignTo="{!sortExpression}" ></apex:param>
+							</apex:commandLink>
+		   				</apex:facet>
+		   			</apex:column>
+		   			<apex:column value="{!myCase.CA_Product_Controller__c}" >
+		   				<apex:facet name="header">
+		   					<apex:commandLink action="{!ViewCases}" value="Product{!IF(sortExpression=='CA_Product_Controller__c',IF(sortDirection='ASC','▼','▲'),'')}">
+								<apex:param value="CA_Product_Controller__c" name="column" assignTo="{!sortExpression}" ></apex:param>
+							</apex:commandLink>
+		   				</apex:facet>
+		   			</apex:column>
+		   			<apex:column value="{!myCase.CreatedDate}" >
+		   				<apex:facet name="header">
+		   					<apex:commandLink action="{!ViewCases}" value="Created Date{!IF(sortExpression=='CreatedDate',IF(sortDirection='ASC','▼','▲'),'')}">
+								<apex:param value="CreatedDate" name="column" assignTo="{!sortExpression}" ></apex:param>
+							</apex:commandLink>
+		   				</apex:facet>
+		   			</apex:column>
+
+		   			<apex:column value="{!myCase.LastModifiedDate}" >
+		   				<apex:facet name="header">
+		   					<apex:commandLink action="{!ViewCases}" value="Last Modified Date{!IF(sortExpression=='LastModifiedDate',IF(sortDirection='ASC','▼','▲'),'')}">
+								<apex:param value="LastModifiedDate" name="column" assignTo="{!sortExpression}" ></apex:param>
+							</apex:commandLink>
+		   				</apex:facet>
+		   			</apex:column>			   			
+				</apex:pageBlockTable>
+			</apex:pageBlockSection>
+				<apex:commandButton value="Previous" action="{!previous}" disabled="{! prev}" id="pp" style="margin-left: 42% "/>
+				<apex:commandButton value="Next"  action="{!next}" disabled="{! nxt}" id="nn"/>
+		</apex:form>
+	</apex:pageBlock>
+
+<script>
+
+	window.document.onload = new function(e) {
+	  if({!tempContact == null})
+	  {
+	    alert("The contact could not be found with the ldap_id");
+	  }
+	}
+</script>	
+</apex:page>

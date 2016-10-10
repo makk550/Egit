@@ -1,0 +1,25 @@
+<apex:page standardController="External_RnD__c" extensions="CreateExternalRndClass">
+ <apex:form id="frmId">
+ <apex:sectionheader title="New External Request" subtitle="Select External Request Record Type"></apex:sectionheader>
+ Select a record type for the new external request. To skip this page in the future, change your record type settings on your personal setup page.<br/><br/>
+     <apex:pageBlock title="Select External Request Record Type" >
+       <apex:pageBlockSection >
+         <apex:pageBlockSectionItem >
+                 
+                    <apex:outputLabel value="Record Types" />
+                    <apex:outputPanel styleClass="requiredInput" layout="block">
+                    <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+                    <apex:selectList value="{!selectedRecordTypeID}" size="1" >
+                        <apex:selectOptions value="{!RecordTypes}" />
+                    </apex:selectList>
+                    </apex:outputPanel>
+         </apex:pageBlockSectionItem>  
+       </apex:pageBlockSection>
+         <apex:pageBlockButtons location="bottom">
+                <apex:commandButton value="Continue" action="{!continueRedirect}" />
+                <apex:commandButton value="Cancel" action="{!cancel}" immediate="true"/>
+            </apex:pageBlockButtons>
+     </apex:pageBlock>
+ 
+ </apex:form>
+</apex:page>

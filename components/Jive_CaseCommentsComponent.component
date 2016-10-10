@@ -1,0 +1,58 @@
+<apex:component controller="Jive_CaseCommentsComponentController" allowDML="true">
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"></link>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+	<apex:attribute name="myCaseId" description="Salesforce Id of the Case whose Case Comments needs to be rendered" type="Id" required="true" assignTo="{!caseId}" />
+	<apex:componentBody >
+		<div class = "container-fluid">
+				<div class="panel panel-primary">
+				      <div class="panel-heading">
+				        <h3 class="panel-title" >Case Comments</h3>
+				      </div>
+				      <div class="panel-body">
+		<apex:form >
+			<apex:pageBlock >
+					<apex:pageBlockButtons location="top" rendered="{! showButton}">
+						<apex:commandButton action="{!NewComment}" value="New"/>
+					</apex:pageBlockButtons>
+
+					<apex:pageBlockSection rendered="{! showComment}">
+						<div class="row top-bufferLrg">
+					         	<div class="col-sm-5 col-sm-offset-2">
+									<div class="form-group">
+									    <apex:inputTextarea styleClass="form-control" style="margin: 0px; width: 671px; height: 119px;"	value="{! insertComment}" id="inputComment"/>
+									</div>
+								</div>	
+					    </div>
+
+					      <div class="row top-bufferSml">
+				         	<div class="col-sm-5 col-sm-offset-4">
+				            	<apex:commandButton value="Add" action="{! insertComment}" style="margin-top: 10px"/>
+				            	
+				            </div>
+				         </div>
+					</apex:pageBlockSection>
+
+					<apex:pageBlockTable value="{!Comments}" var="comment"> 
+						<!-- <apex:column headerValue="Comments"> -->
+						<apex:column >
+						<apex:outputText escape="false" value="{!comment.commentText}"/>
+						</apex:column>
+					</apex:pageBlockTable>
+			</apex:pageBlock>	
+		</apex:form>
+		</div>
+		</div>	
+		</div>
+	</apex:componentBody>
+
+	<script>
+       var  j$= jQuery.noConflict();
+       function clearMe(){
+           j$("[id$=inputComment]").val('');
+       }
+	</script>
+
+
+
+</apex:component>

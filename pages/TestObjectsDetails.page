@@ -1,0 +1,14 @@
+<apex:page controller="DisplayObjectDetail" >
+ <apex:form >
+ <apex:SelectList value="{!selectedObject}" size="1" onchange="initFieldsScript()">
+ <apex:selectOptions value="{!Objects}"></apex:selectOptions>
+ <apex:actionFunction action="{!initFields}" name="initFieldsScript" rerender="pbtFields">
+ </apex:actionFunction>
+ </apex:SelectList>
+ <apex:pageBlock >
+ <apex:pageblocktable value="{!lstFieldResult}" var="field" id="pbtFields">
+ <apex:column headervalue="Field Name">{!field.FieldApiName}</apex:column>
+ <apex:column headervalue="Is Used">{!field.IsUsed}</apex:column>
+ </apex:pageblocktable></apex:pageBlock>
+ </apex:form>
+ </apex:page>

@@ -1,0 +1,24 @@
+<apex:page standardController="Case" showHeader="false" extensions="CBRCaseCreateNotificationExtension">
+
+
+
+<script type="text/javascript">  
+              var s = '{!caseNo}';
+                console.log('s:'+s);
+</script>  
+
+<apex:form >
+    <apex:pageBlock >
+    <apex:pageBlockSection >
+        
+        <apex:pageBlockSectionItem >
+            <apex:outputLabel >Case Number</apex:outputLabel>
+            <apex:outputText value="{!caseNo}"></apex:outputText>
+        </apex:pageBlockSectionItem>
+    </apex:pageBlockSection>
+    </apex:pageBlock>
+    </apex:form>
+    <div id= "popup1">
+    <div id="caseInfo"> </div>
+ </div>
+</apex:page>

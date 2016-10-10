@@ -1,0 +1,18 @@
+<apex:page standardController="Account_Plan3__c" extensions="AccountPlanApproverControllerExtension" >
+
+
+ 
+    <apex:sectionHeader title="Select Approver for Account Plan"/>
+    <apex:form id="theform">
+    <apex:pageBlock mode="edit" id="theBlock">
+        <apex:pageBlockButtons >
+            <apex:commandButton value="Select Approver" action="{!saveapprover}" rerender="ErrorMsgBlock" />
+            <apex:commandButton action="{!Cancel}" value="Cancel"/>
+        </apex:pageBlockButtons>
+
+        <apex:pagemessages id="ErrorMsgBlock"></apex:pagemessages>
+        <apex:OutputText >Approver Name:</apex:OutputText><apex:inputField value="{!Account_Plan3__c.Account_Plan_Approver__c}"/>
+         </apex:pageBlock>
+     </apex:form>   
+
+</apex:page>

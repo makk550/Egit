@@ -1,0 +1,1727 @@
+<apex:page standardController="Business_Plan_New__c" extensions="BusinessPlanControllerExtension" standardStylesheets="true" showHeader="true" sidebar="true">
+
+<apex:stylesheet value="{!URLFOR($Resource.bpstyles, 'styles.min.css')}" />
+
+<script>
+     var newWin=null; 
+     function openContactLookup(searchPage, name, id, target, testContact)  
+     {  
+            var accountId = "{!bpAccountId}";
+            var contactEmail = '{!$Component.contactEmail}';
+            var contactPhone = '{!$Component.contactPhone}';
+            var contactMobile = '{!$Component.contactMobile}'; 
+            var contactFax = '{!$Component.contactFax}'; 
+            var contactTitle = '{!$Component.contactTitle}'; 
+ 
+            var url="{!$Site.prefix}/apex/" + searchPage +"?namef=" + name + "&idf=" + id + "&accId=" + accountId + "&emailf=" + contactEmail + "&phonef=" + contactPhone
+                             + "&mobilef=" + contactMobile + "&faxf=" + contactFax + "&titlef=" + contactTitle + "&targetf=" + target + "&isBP=true" + "&tstCont=" + testContact;        
+            newWin=window.open(url, 'Popup','height=500,width=600,left=100,top=100,resizable=no,scrollbars=yes,toolbar=no,status=no');   
+     
+            if (window.focus)    
+                {    newWin.focus();   
+            }           
+            return false;
+     }
+     
+     function closeLookupPopup()  
+     {     
+
+            if (null!=newWin)     
+            {        
+                newWin.close();     
+            }    
+     
+     }
+     function openUserLookupPopup(searchPage,name, id,inp,usr)  
+     {
+       var txt ='';
+       var usrT =''; 
+       if(document.getElementById(usr) != null)
+       usrT =document.getElementById(usr).value;
+         //alert('usrType>>'+usrT);
+       if(document.getElementById(inp) != null)
+       txt =document.getElementById(inp).value;
+       
+       var accountId = "{!busPlanAccountId}";
+       var url="{!$Site.prefix}/apex/" + searchPage +"?namefield=" + name + "&idfield=" + id+"&uName=" + txt +"&aName="+accountId+"&inpField="+inp +"&uType="+usrT;   
+        
+       newWin=window.open(url, 'Popup','height=500,width=750,left=100,top=100,resizable=no,scrollbars=yes,toolbar=no,status=no');   
+     
+       if (window.focus)    
+                {    newWin.focus();   
+            }           return false; 
+            
+              
+     } 
+     
+      
+</script>
+
+    <apex:form >
+         <apex:actionFunction name="tabChange" action="{!clickedTab}" reRender="tabPanel, errors"> 
+             <apex:param name="tabName" value="" assignTo="{!intendedTab}"/>
+         </apex:actionFunction>
+         
+         
+         <apex:actionFunction name="getKey" action="{!getKey}" reRender="tabPanel, errors"> 
+             <apex:param name="prod" value="" assignTo="{!tmpProd}"/>
+             <apex:param name="type" value="" assignTo="{!tmpType}"/>             
+         </apex:actionFunction>         
+
+        <apex:pageBlock title="Business Plan" mode="edit" >
+            
+                <apex:pageBlockButtons >
+                    <apex:commandButton action="{!saveClonedBP}" value="Save" styleClass="btn"/>
+                    <apex:commandButton action="{!cancel}" value="Cancel" styleClass="btn secondary"/>    
+                </apex:pageBlockButtons>
+                
+        <apex:pageMessages id="errors"/>
+
+        <apex:tabPanel selectedTab="{!currentTab}" value="{!currentTab}" id="tabPanel" switchType="ajax" immediate="true" activeTabClass="activeTab" disabledTabClass="inactiveTab">
+
+            <apex:tab label="{!$Label.BP_Profile}" name="1" disabled="{!profileTabEnabled}" ontabenter="tabChange('1')"  >
+            <p class="larger"><span class="bluehead">{!$Label.BP_Lets_Begin}</span><br/>
+            {!$Label.BP_Company_Details}
+            </p>
+            <br/>
+                <apex:pageBlockSection columns="2">
+                    <apex:pageblockSectionItem >
+                        <apex:outputLabel value="{!$Label.BP_Partner_Profile}" styleClass="greenhead"/>
+                         <apex:outputText value="" styleClass="greenhead"/>
+                    </apex:pageblockSectionItem> 
+                    <apex:pageblockSectionItem >
+                        <apex:outputLabel value="" styleClass="greenhead"/>
+                         <apex:outputText value="" styleClass="greenhead"/>
+                    </apex:pageblockSectionItem>
+                 
+                    <apex:pageblockSectionItem >
+                        <apex:outputLabel value="{!$ObjectType.Business_Plan_New__c.Fields.Account_Name__c.Label}"/>
+                        <apex:outputText value="{!clonedBP.Account_Name__c}"/>
+                    </apex:pageblockSectionItem>                          
+
+                    <apex:pageblockSectionItem rendered="{!logoError}">
+                        <apex:outputLabel value="{!$Label.BP_Partner_Logo}"/>
+                        <apex:outputLabel value="{!$Label.no_logo_exists}"/>
+                    </apex:pageblockSectionItem> 
+                    <apex:pageblockSectionItem rendered="{!IF(logoError, false, true)}">
+                        <apex:outputLabel value="{!$Label.BP_Partner_Logo}"/>
+                        <apex:image height="50" width="150" rendered="{!NOT(ISNULL(logoAttachmentID))}" value="{!URLFOR($Action.Attachment.Download, logoAttachmentID)}"/>
+                    </apex:pageblockSectionItem>                     
+                    <apex:pageblockSectionItem >
+                        <apex:outputLabel value="{!$ObjectType.Business_Plan_New__c.Fields.Account_Description__c.Label}"/>
+                        <apex:outputText value="{!clonedBP.Account_Description__c}"/>
+                    </apex:pageblockSectionItem>
+                   <!-- <apex:pageblockSectionItem >
+                        <apex:outputLabel value="Physical Address"/>
+                        <apex:outputText value="{!myAccountAddress}"/>
+                    </apex:pageblockSectionItem> -->
+                     
+                    <apex:outputText value="" styleClass="dataCol first "/>
+                    
+                    <apex:pageblockSectionItem >
+                        <apex:outputLabel value="{!$ObjectType.Business_Plan_New__c.Fields.Account_Billing_Street__c.Label}"/>
+                        <apex:inputtext value="{!clonedBP.Account_Billing_Street__c}"/>
+                    </apex:pageblockSectionItem>
+                    <apex:pageblockSectionItem >
+                        <apex:outputLabel value="{!$ObjectType.Business_Plan_New__c.Fields.Account_Billing_State__c.Label}"/>                                                                                 
+                        <apex:inputtext value="{!clonedBP.Account_Billing_State__c}"/>
+                    </apex:pageblockSectionItem>                    
+                    <apex:pageblockSectionItem >
+                        <apex:outputLabel value="{!$ObjectType.Business_Plan_New__c.Fields.Account_Billing_City__c.Label}"/>                                        
+                        <apex:inputtext value="{!clonedBP.Account_Billing_City__c}"/>
+                    </apex:pageblockSectionItem>                    
+                    <apex:pageblockSectionItem >
+                        <apex:outputLabel value="{!$ObjectType.Business_Plan_New__c.Fields.Account_Billing_Zip__c.Label}"/>                                        
+                        <apex:inputtext value="{!clonedBP.Account_Billing_Zip__c}"/>                      
+                    </apex:pageblockSectionItem>                    
+
+                    <!--<apex:outputText value="" styleClass="dataCol first "/>
+                    <apex:inputField value="{!Business_Plan_New__c.Physical_Street__c}"/>                                                              
+                    <apex:inputField value="{!Business_Plan_New__c.Physical_State_Province__c}"/>                    
+                    <apex:inputField value="{!Business_Plan_New__c.Physical_City__c}"/>                    
+                    <apex:inputField value="{!Business_Plan_New__c.Physical_Zip_Postal_Code__c}"/> -->                                                                               
+                    <apex:pageblockSectionItem >
+                        <apex:outputLabel value="{!$ObjectType.Business_Plan_New__c.Fields.Reseller_Distributor_ID__c.Label}"/>
+                        <apex:outputText value="{!clonedBP.Reseller_Distributor_ID__c}"/>
+                    </apex:pageblockSectionItem> 
+                    <apex:pageblockSectionItem >
+                        <apex:outputLabel value="{!$ObjectType.Business_Plan_New__c.Fields.Account_Country_Picklist__c.Label}"/>
+                        <apex:outputText value="{!clonedBP.Account_Country_Picklist__c}"/>
+                    </apex:pageblockSectionItem>  
+                    <apex:pageblockSectionItem >
+                        <apex:outputLabel value="{!$ObjectType.Business_Plan_New__c.Fields.DUNS_Number__c.Label}"/>
+                        <apex:outputText value="{!clonedBP.DUNS_Number__c}"/>
+                    </apex:pageblockSectionItem>   
+                    <apex:pageblockSectionItem >
+                        <apex:outputLabel value="{!$ObjectType.Business_Plan_New__c.Fields.GEO__c.Label}"/>
+                        <apex:outputText value="{!clonedBP.GEO__c}"/>
+                    </apex:pageblockSectionItem> 
+                    <apex:pageblockSectionItem >
+                        <apex:outputLabel value="{!$ObjectType.Business_Plan_New__c.Fields.DUNS_Name__c.Label}"/>
+                        <apex:outputText value="{!clonedBP.DUNS_Name__c}"/>
+                    </apex:pageblockSectionItem>
+                    <apex:pageblockSectionItem >
+                        <apex:outputLabel value="{!$ObjectType.Business_Plan_New__c.Fields.Phone__c.Label}"/>
+                        <apex:outputText value="{!clonedBP.Phone__c}"/>
+                    </apex:pageblockSectionItem>                                                                                                                                                                                                            
+                    <apex:pageblockSectionItem >
+                        <apex:outputLabel value="{!$ObjectType.Business_Plan_New__c.Fields.Creator_Language__c.Label}"/>
+                        <apex:outputText value="{!clonedBP.Creator_Language__c}"/>
+                    </apex:pageblockSectionItem>  
+                                       
+                    <apex:pageblockSectionItem >
+                        <apex:outputLabel value="{!$ObjectType.Business_Plan_New__c.Fields.Website__c.Label}"/>
+                        <apex:inputText value="{!clonedBP.Website__c}"/>
+                    </apex:pageblockSectionItem>
+                    
+                    
+                                        
+                   <apex:pageblockSectionItem >
+                        <apex:outputLabel value="{!$ObjectType.Business_Plan_New__c.Fields.Creator_Currency__c.Label}"/>
+                         <apex:outputText value="{!clonedBP.Creator_Currency__c}"/>
+                  
+                                        
+                    </apex:pageblockSectionItem>
+                    
+                    <apex:pageblockSectionItem >
+                        <apex:outputLabel value="{!$ObjectType.Business_Plan_New__c.Fields.Plan_Fiscal_Year__c.Label}" />
+                        <apex:outputPanel > 
+                            <div class="requiredInput" layout="block">
+                                <div class="requiredBlock" layout="block"/>
+                                <apex:selectList value="{!clonedBP.Plan_Fiscal_Year__c}" size="1">
+                                    <apex:actionSupport event="onchange" reRender="tabPanel" action="{!calcPlanPeriod}"/>  
+                                    <apex:selectOptions value="{!BPFYears}"/>
+                                </apex:selectList>       
+                            </div>
+                         </apex:outputPanel>                           
+                    </apex:pageblockSectionItem>
+
+                    <apex:pageblockSectionItem >
+                        <apex:outputLabel value="{!$ObjectType.Business_Plan_New__c.Fields.Plan_Period_From__c.Label}"/>
+                        <apex:outputText value="{!clonedBP.Plan_Period_From__c}"/>
+                    </apex:pageblockSectionItem>                    
+
+                    <apex:pageblockSectionItem >
+                        <apex:outputLabel value="{!$ObjectType.Business_Plan_New__c.Fields.Plan_Period_To__c.Label}"/>
+                        <apex:outputText value="{!clonedBP.Plan_Period_To__c}"/>
+                    </apex:pageblockSectionItem>
+                    <apex:outputText value="" styleClass="dataCol first "/>
+                    <apex:outputText value="" styleClass="dataCol first "/>
+       <apex:pageblockSectionItem >
+                        <apex:outputLabel value="{!$Label.BP_Route_to_Market}" styleClass="greenhead"/>
+                         <apex:outputText value="" styleClass="greenhead"/>
+                    </apex:pageblockSectionItem> 
+                      <apex:pageblockSectionItem >
+                        <apex:outputLabel value="" styleClass="greenhead"/>
+                         <apex:outputText value="" styleClass="greenhead"/>
+        </apex:pageblockSectionItem>  
+         
+                    
+                    <apex:pageblockSectionItem >
+                        <apex:outputLabel style="font-weight:bold;" value="{!$ObjectType.Business_Plan_New__c.Fields.Alliance__c.Label}" />
+                        <apex:inputField value="{!clonedBP.Alliance__c}"/>
+                    </apex:pageblockSectionItem>                    
+                    <apex:pageblockSectionItem >
+                        <apex:outputLabel style="font-weight:bold;" value="{!$ObjectType.Business_Plan_New__c.Fields.Service_Provider__c.Label}" />
+                        <apex:inputField value="{!clonedBP.Service_Provider__c}"/>
+                    </apex:pageblockSectionItem>                     
+                    <apex:inputField value="{!clonedBP.Alliance_Type__c}"/>
+                    <apex:inputField value="{!clonedBP.Service_Provider_Type__c}"/>
+                    <apex:inputField value="{!clonedBP.Alliance_Designation__c}"/>
+                    <apex:inputField value="{!clonedBP.Service_Provider_Designation__c}"/>
+                    <apex:inputField value="{!clonedBP.Primary_RTM_Alliance__c}"/>
+                    <apex:inputField value="{!clonedBP.Primary_RTM_Servide_Provider__c}"/>
+                    <apex:inputField value="{!clonedBP.Alliance_Program_Level__c}"/>
+                    <apex:inputField value="{!clonedBP.Service_Provider_Program_Level__c}" label="{!$Label.BP_Service_Provider_Program_Level}"/>
+                    <apex:outputText value="" styleClass="dataCol first "/>
+                    <apex:outputText value="" styleClass="dataCol first "/>
+                    <apex:pageblockSectionItem >
+                        <apex:outputLabel style="font-weight:bold;" value="{!$ObjectType.Business_Plan_New__c.Fields.Solution_Provider__c.Label}" />
+                        <apex:inputField value="{!clonedBP.Solution_Provider__c}"/>
+                    </apex:pageblockSectionItem>    
+                                    
+                    <apex:pageblockSectionItem >
+                        <!-- MANAR08 AR:2267
+                        <apex:outputLabel style="font-weight:bold;" value="{!$ObjectType.Business_Plan_New__c.Fields.Data_Management__c.Label}" />
+                        <apex:inputField value="{!Business_Plan_New__c.Data_Management__c}"/>
+                        -->            
+                    </apex:pageblockSectionItem>
+                             
+                    <apex:inputField value="{!clonedBP.Solution_Provider_Type__c}"/>
+                    <!-- MANAR08 AR:2267 <apex:inputField value="{!Business_Plan_New__c.DM_Type__c}"/>  -->
+                    <apex:outputText value="" />
+                    <apex:inputField value="{!clonedBP.Solution_Provider_Designation__c}"/>
+                    <!-- MANAR08 AR:2267 <apex:inputField value="{!Business_Plan_New__c.DM_Designation__c}"/> -->
+                    <apex:outputText value="" />
+                    <apex:inputField value="{!clonedBP.Primary_RTM_Solution_Provider__c}"/>
+                    <!-- MANAR08 AR:2267 <apex:inputField value="{!Business_Plan_New__c.Primary_RTM_DM__c}"/> -->
+                    <apex:outputText value="" />
+                    <apex:inputField value="{!clonedBP.Solution_Provider_Program_Level__c}"  label="{!$Label.BP_Solution_Provider_Program_Level}"/>
+                    <!-- MANAR08 AR:2267 <apex:inputField value="{!Business_Plan_New__c.DM_Program_Level__c}" label="{!$Label.BP_DM_Program_Level}"/> -->
+                    <apex:outputText value="" />
+                </apex:pageBlockSection>                
+                
+                <apex:commandButton value="{!$Label.BP_Next +' >'}" action="{!nextTab}" reRender="tabPanel,errors" styleClass="btn next" oncomplete="scroll(0, 0)"/>
+            </apex:tab>
+            
+            <apex:tab label="{!$Label.BP_Territory}" name="2" disabled="{!territoryTabEnabled}" ontabenter="tabChange('2')">
+
+            <p class="larger"><span class="bluehead">{!$Label.BP_Select_the_regions_and_markets_where_you_have_a_presence_and_will_target}</span><br/>
+            {!$Label.BP_First_select_a_region_then_the_corresponding_target_markets_and_countries_wh}
+            </p>
+            <br/>            
+            <apex:pageblockSection columns="1">                            
+
+            </apex:pageblocksection>
+                <br></br>
+
+            <apex:outputpanel id="TerritoryPanel">
+            <table class="territory middle check-right">
+                <tr class="territory-row">
+                    <th>{!$Label.BP_Region}</th>
+                    <th>{!$Label.BP_Target_Markets}</th>
+                    <th>{!$Label.BP_Countries}</th>
+                </tr>
+                
+                <tr class="territory-row alt">
+                    <td style="white-space:nowrap">
+                        <apex:outputLabel value="{!$ObjectType.Business_Plan_New__c.Fields.WW__c.Label}"/>&nbsp;&nbsp;&nbsp;&nbsp;                    
+                        <apex:inputcheckbox id="CB_WW" onclick="radioClick()" onchange="autoPopulateRegionCheckboxes()" value="{!clonedBP.WW__c}" label="{!$ObjectType.Business_Plan_New__c.Fields.WW__c.Label}">
+                            <!--<apex:actionSupport event="onchange" rerender="TerritoryPanel" action="{!WWClick}"/>-->
+                        </apex:inputcheckbox>
+                        <script>
+                            function radioClick()
+                            {
+                             this.blur();  
+                             this.focus(); 
+                             //autoPopulateRegionCheckboxes(); 
+                            }    
+                                                
+                            function autoPopulateRegionCheckboxes()
+                            {
+                                var isChecked = document.getElementById('{!$Component.CB_WW}').checked;
+                                
+                                document.getElementById('{!$Component.CB_NA}').checked = isChecked;
+                                document.getElementById('{!$Component.CB_LA}').checked = isChecked;
+                                document.getElementById('{!$Component.CB_EMEA}').checked = isChecked;
+                                document.getElementById('{!$Component.CB_APJ}').checked = isChecked;
+                            }                            
+                        </script>
+                        
+                    </td>
+                    <td>                             
+
+                    </td>
+                    <td>                            
+
+                    </td>
+                </tr>                
+                
+                <tr class="territory-row">
+                    <td>
+                        <apex:outputLabel value="{!$ObjectType.Business_Plan_New__c.Fields.NA__c.Label}"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <apex:inputcheckbox id="CB_NA" value="{!clonedBP.NA__c}">
+
+                        </apex:inputcheckbox>
+                    </td>
+                     <td>                             
+                        <apex:inputField value="{!clonedBP.NA_Operating_Areas__c}"/> 
+                    </td>
+                    <td>                            
+                        <apex:inputfield value="{!clonedBP.NA_Countries__c}"/>   
+                    </td>
+                </tr>
+                
+                <tr class="territory-row alt">
+                    <td>
+                        <apex:outputLabel value="{!$ObjectType.Business_Plan_New__c.Fields.LA__c.Label}"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <apex:inputcheckbox id="CB_LA" value="{!clonedBP.LA__c}"/>
+                    </td>
+
+                     <td>                             
+                        <apex:inputField value="{!clonedBP.LA_Operating_Areas__c}"/> 
+                    </td>
+
+                    <td>                            
+                        <apex:inputfield value="{!clonedBP.LA_Countries__c}"/>   
+                    </td>
+                </tr>
+                
+                <tr class="territory-row">
+                    <td>
+                        <apex:outputLabel value="{!$ObjectType.Business_Plan_New__c.Fields.EMEA__c.Label}"/>&nbsp;&nbsp;&nbsp;
+                        <apex:inputcheckbox id="CB_EMEA" value="{!clonedBP.EMEA__c}"/>
+                    </td>
+
+                     <td>                             
+                        <apex:inputField value="{!clonedBP.EMEA_Operating_Areas__c}"/> 
+                    </td>
+
+                    <td>                            
+                        <apex:inputfield value="{!clonedBP.EMEA_Countries__c}"/>   
+                    </td>
+                </tr>
+                
+                <tr class="territory-row alt">
+                    <td>
+                        <apex:outputLabel value="{!$ObjectType.Business_Plan_New__c.Fields.APJ__c.Label}"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <apex:inputcheckbox id="CB_APJ" value="{!clonedBP.APJ__c}"/>
+                    </td>
+
+                     <td>                             
+                        <apex:inputField value="{!clonedBP.APJ_Operating_Areas__c}"/> 
+                    </td>
+
+                    <td>                            
+                        <apex:inputfield value="{!clonedBP.APJ_Countries__c}"/>   
+                    </td>
+                </tr>                                                
+            </table>
+            </apex:outputpanel>
+
+                <br></br>
+                <br></br>                
+                <apex:commandButton value="{!'< ' + $Label.BP_Prev}" action="{!prevTab}" reRender="tabPanel" styleClass="btn prev" oncomplete="scroll(0, 0)"/>
+                <apex:commandButton value="{!$Label.BP_Next + ' >'}" action="{!nextTab}" reRender="tabPanel,errors" styleClass="btn next" oncomplete="scroll(0, 0)"/>
+            </apex:tab>
+            
+            <apex:tab label="{!$Label.BP_Go_To_Market}" name="3" disabled="{!GTMTabEnabled}" ontabenter="tabChange('3')">
+            
+            <p class="larger"><span class="bluehead">{!$Label.BP_Describe_the_strategy_for_solving_problems_for_customers_in_the_markets}</span><br/>
+            {!$Label.BP_Please_document_the_go_to_market_strategy_that_will_enable_our_joint_efforts}
+            </p>
+            <br/>             
+            
+                <apex:pageBlockSection columns="1">            
+                    <apex:inputfield value="{!clonedBP.GTM_Q1__c}"/>
+                    <apex:inputfield value="{!clonedBP.GTM_Q2__c}"/>
+                    <apex:inputfield value="{!clonedBP.GTM_Q3__c}"/>
+                    <apex:inputfield value="{!clonedBP.GTM_Q4__c}" label="{!$Label.BP_Joint_Value_Proposition_to_Customers}"/>
+                    <apex:inputfield value="{!clonedBP.GTM_Q5__c}"/>
+                    <apex:inputfield value="{!clonedBP.GTM_Q6__c}"/>
+                    <apex:inputfield value="{!clonedBP.GTM_Q7__c}"/>
+                    <apex:inputfield value="{!clonedBP.GTM_Q8__c}" label="{!$Label.BP_Partner_Strategy_for_Differentiation}"/>
+                    <apex:inputfield value="{!clonedBP.GTM_Q11__c}"/>
+                    <apex:inputfield value="{!clonedBP.GTM_Q12__c}"/>
+                    <apex:outputText value="" styleClass="dataCol first "/> 
+                    <apex:inputfield value="{!clonedBP.Target_Sector__c}"/>
+                    <apex:inputfield value="{!clonedBP.Target_Vertical__c}"/>                                                       
+                 </apex:pageBlockSection>
+                 
+                 <apex:pageBlockSection title="{!$Label.BP_MSO_Opportunity}" columns="2" rendered="{!IsMSP}">
+                    <apex:inputfield value="{!clonedBP.MSO_Opportunity_Name__c}"/>
+                    <apex:outputText value="" styleClass="dataCol first "/>
+                    <apex:inputfield value="{!clonedBP.GTM_SP_Q2__c}"/>
+                    <apex:outputText value="" styleClass="dataCol first "/>
+                    <apex:inputfield value="{!clonedBP.GTM_SP_Q3__c}" label="{!$Label.BP_LOB_Revenue_as_of_Total_Revenue}"/>
+                    <apex:outputText value="" styleClass="dataCol first "/>
+                    <apex:inputfield value="{!clonedBP.GTM_SP_Q4__c}"/>
+                    <apex:outputText value="" styleClass="dataCol first "/>
+                    <apex:inputfield value="{!clonedBP.GTM_SP_Q5__c}" label="{!$Label.BP_Name_of_Managed_Service_Offering}"/>
+                    <apex:outputText value="" styleClass="dataCol first "/>                    
+                    <apex:inputfield value="{!clonedBP.GTM_SP_Q6__c}"/>
+                    <apex:outputText value="" styleClass="dataCol first "/>
+                    <apex:inputfield value="{!clonedBP.GTM_SP_Q7__c}" label="{!$Label.BP_Business_Objective_Comments}"/>
+                    <apex:outputText value="" styleClass="dataCol first "/>
+                    <apex:inputfield value="{!clonedBP.GTM_SP_Q8__c}"/>
+                    <apex:outputText value="" styleClass="dataCol first "/>
+                    <apex:inputfield value="{!clonedBP.GTM_SP_Q9__c}"/>
+                    <apex:outputText value="" styleClass="dataCol first "/>
+                    <apex:inputfield value="{!clonedBP.GTM_SP_Q10__c}" label="{!$Label.BP_Target_Geographies_Comments}"/>
+                    <apex:outputText value="" styleClass="dataCol first "/>
+                    <!--<apex:inputfield value="{!Business_Plan_New__c.GTM_SP_Q11__c}"/>-->
+                    <apex:inputfield value="{!clonedBP.GTM_SP_Q12__c}"/>
+                    <apex:inputfield value="{!clonedBP.GTM_SP_Q13__c}" label="{!$Label.BP_Market_Attractiveness_Score_Comments}"/>                                                                                                                                                                                    
+                    <apex:inputfield value="{!clonedBP.GTM_SP_Q14__c}"/>
+                    <apex:inputfield value="{!clonedBP.GTM_SP_Q15__c}" label="{!$Label.BP_Strength_of_Offering_Comments}"/>
+                    <apex:inputfield value="{!clonedBP.GTM_SP_Q16__c}"/>
+                    <apex:inputfield value="{!clonedBP.GTM_SP_Q17__c}" label="{!$Label.BP_Competitive_Position_Comments}"/>
+                    <apex:inputfield value="{!clonedBP.GTM_SP_Q18__c}"/>
+                    <apex:outputText value="" styleClass="dataCol first "/>
+                 </apex:pageBlockSection>     
+
+                <apex:pageBlockSection title="{!$Label.BP_Platform_Rationalization_Opportunity}" columns="2" rendered="{!IsMSP}">
+                    <apex:inputfield value="{!clonedBP.Number_of_data_centers__c}"/>
+                    <apex:outputText value="" styleClass="dataCol first "/>
+                    <apex:inputfield value="{!clonedBP.Geography_distribution__c}"/>
+                    <apex:outputText value="" styleClass="dataCol first "/>
+                    <apex:inputfield value="{!clonedBP.Data_Center_Tiers__c}"/>
+                    <apex:outputText value="" styleClass="dataCol first "/>
+                    <apex:inputfield value="{!clonedBP.Real_estate_ownership__c}"/>
+                    <apex:outputText value="" styleClass="dataCol first "/>
+                    <apex:inputfield value="{!clonedBP.Business_Performance__c}"/>
+                    <apex:outputText value="" styleClass="dataCol first "/>
+                    <apex:inputfield value="{!clonedBP.Insourcing_Multi_sourcing__c}" label="{!$Label.BP_Insourcing_Multi_sourcing}"/>
+                    <apex:outputText value="" styleClass="dataCol first "/>
+                    <!--<apex:inputfield required="true" value="{!clonedBP.ROI_Expectations__c}"/>-->
+                    <apex:outputText value="" styleClass="dataCol first "/>                    
+                    <apex:outputText value="" styleClass="dataCol first "/>
+                    <apex:inputfield value="{!clonedBP.Capability_1__c}"/>
+                    <apex:inputfield value="{!clonedBP.Capability_2__c}"/>
+                    <apex:inputfield value="{!clonedBP.Description_of_Desired_State_1__c}"/>
+                    <apex:inputfield value="{!clonedBP.Description_of_Desired_State_2__c}"/>
+                    <apex:inputfield value="{!clonedBP.Description_of_Current_State_1__c}"/>
+                    <apex:inputfield value="{!clonedBP.Description_of_Current_State_2__c}"/>
+                    <apex:inputfield value="{!clonedBP.Rationalization_Opportunities_1__c}"/>  
+                    <apex:inputfield value="{!clonedBP.Rationalization_Opportunities_2__c}"/>
+                     <apex:outputText value="" styleClass="dataCol first "/>                    
+                     <apex:outputText value="" styleClass="dataCol first "/>
+                     <apex:inputfield value="{!clonedBP.Capability_3__c}"/>
+                     <apex:inputfield value="{!clonedBP.Capability_4__c}"/>
+                     <apex:inputfield value="{!clonedBP.Description_of_Desired_State_3__c}"/>
+                     <apex:inputfield value="{!clonedBP.Description_of_Desired_State_4__c}"/>
+                     <apex:inputfield value="{!clonedBP.Description_of_Current_State_3__c}"/>
+                     <apex:inputfield value="{!clonedBP.Description_of_Current_State_4__c}"/>
+                     <apex:inputfield value="{!clonedBP.Rationalization_Opportunities_3__c}"/>  
+                    <apex:inputfield value="{!clonedBP.Rationalization_Opportunities_4__c}"/>
+                    <apex:outputText value="" styleClass="dataCol first "/>                    
+                    <apex:outputText value="" styleClass="dataCol first "/>
+                    <apex:inputfield value="{!clonedBP.Capability_5__c}"/>
+                    <apex:inputfield value="{!clonedBP.Capability_6__c}"/>
+                    <apex:inputfield value="{!clonedBP.Description_of_Desired_State_5__c}"/>
+                    <apex:inputfield value="{!clonedBP.Description_of_Desired_State_6__c}"/>
+                    <apex:inputfield value="{!clonedBP.Description_of_Current_State_5__c}"/>
+                    <apex:inputfield value="{!clonedBP.Description_of_Current_State_6__c}"/>
+                    <apex:inputfield value="{!Business_Plan_New__c.Rationalization_Opportunities_5__c}"/>  
+                    <apex:inputfield value="{!clonedBP.Rationalization_Opportunities_6__c}"/>                                                                                                                                                                                                                                                                   
+                </apex:pageBlockSection>                 
+                                           
+                <br></br>
+                <br></br>                  
+                <apex:commandButton value="{!'< '+ $Label.BP_Prev}" action="{!prevTab}" reRender="tabPanel" styleClass="btn prev" oncomplete="scroll(0, 0)"/>
+                <apex:commandButton value="{!$Label.BP_Next + ' >'}" action="{!nextTab}" reRender="tabPanel" styleClass="btn next" oncomplete="scroll(0, 0)"/>
+            </apex:tab>
+            <apex:tab label="{!$Label.BP_Solutions}" name="4" disabled="{!solutionsTabEnabled}" ontabenter="tabChange('4')">
+            
+            <p class="larger"><span class="bluehead">{!$Label.BP_Select_the_primary_solutions_to_focus_on_taking_to_market}</span><br/>
+            {!$Label.BP_Identify_your_go_to_market_solutions_by} <br/>
+            <span style="color:#00B0F0"> <b>
+                 {!$Label.BP_Solutions_Tab_Message1} <br/>
+                 {!$Label.BP_Solutions_Tab_Message2}                 
+             </b></span>
+            </p>
+            <br/>            
+            
+                <apex:pageBlockSection columns="1">
+                    <apex:pageblocksectionItem >
+                        <apex:outputlabel value="{!$Label.BP_Route_to_Market}" for="RTMvalues" />
+                        <apex:selectList value="{!SolutionRTM}" size="1" id="RTMvalues">
+                            <apex:actionSupport event="onchange" reRender="tabPanel, RTMBUs,RTMPGs,JSOField,JSOLabel" action="{!clearBUPG}" status="msg_refresh"/>
+                            <apex:selectOptions value="{!RTMs}"/>
+                        </apex:selectList>
+                    </apex:pageblocksectionItem>
+                    
+                    <apex:pageblocksectionItem >
+                        <apex:outputlabel value="{!$Label.BP_Business_Unit}" for="RTMBUs" />
+                        <apex:selectList value="{!SolutionBU}" size="1" id="RTMBUs">
+                            <apex:actionSupport event="onchange" reRender="RTMPGs" status="msg_refresh"/>
+                            <apex:selectOptions value="{!BUs}"/>
+                        </apex:selectList>
+                    </apex:pageblocksectionItem>   
+                    
+                    <apex:pageblocksectionItem >
+                        <apex:outputlabel value="{!$Label.BP_Product_Group}" for="RTMPGs" />
+                        <apex:selectList value="{!SolutionPG}" size="1" id="RTMPGs">
+                            <apex:selectOptions value="{!ProductGroups}"/>
+                        </apex:selectList>
+                    </apex:pageblocksectionItem>  
+                    
+                    <apex:pageblocksectionItem >
+                        <apex:outputLabel id="JSOLabel" rendered="{!IF(SolutionRTM=='Alliance', true, false)}" value="{!$Label.BP_JSO_Name}"/>
+                        <apex:inputfield id="JSOField" rendered="{!IF(SolutionRTM=='Alliance', true, false)}" value="{!clonedBP.JSO_Name__c}"/>
+                    </apex:pageblocksectionItem>                    
+               <apex:actionStatus id="msg_refresh" stopText="">
+                     <apex:facet name="start">
+                          <apex:outputPanel >
+                                <div style="background-color: #dbeefd; opacity: .80; -moz-opacity: 0.80; filter:alpha(opacity=80); position: absolute; left:0;top:0; width:100%; height:100%; z-index: 3;"><apex:image value="/img/loading32.gif" style="height: 40px; position: relative; left:400px;top:200px;"/></div>
+                            </apex:outputPanel>
+                        </apex:facet>
+                 </apex:actionStatus>
+                    <apex:actionStatus id="Refreshing" startText="Loading..." stopText="" styleClass="second-column" />                                                                          
+                    <apex:commandButton value="{!'+ ' + $Label.BP_Add}" disabled="{!isAddDisabled}" action="{!AddProduct}" rerender="PGTable,errors" styleClass="btn add second-column"/>                                    
+                    <apex:outputText value="" styleClass="dataCol first "/>
+
+
+                    <apex:outputPanel id="PGTable">
+                    
+        <apex:pageBlockTable value="{!AddedPGs}" var="PG">
+                      
+            <apex:column value="{!PG.myRTM}"> 
+                <apex:facet name="header">
+                    {!$Label.BP_Route_to_Market}
+                </apex:facet>    
+            </apex:column>        
+            <apex:column value="{!PG.myBU}"> 
+              <apex:facet name="header">
+                    {!$Label.BP_Business_Unit}
+                </apex:facet>    
+            </apex:column>            
+            <apex:column value="{!PG.myPG}"> 
+              <apex:facet name="header">
+                    {!$Label.BP_Product_Group}
+                </apex:facet>    
+            </apex:column>            
+            <apex:column value="{!PG.myJSO}"> 
+              <apex:facet name="header">
+                    {!$Label.BP_JSO_Name}
+                </apex:facet>    
+            </apex:column>                                                
+            <apex:column styleClass="center">
+            <apex:facet name="header">
+                    <span class="trash">delete</span>
+                </apex:facet>
+            
+                <apex:commandButton value="X" action="{!delSolRow}" rerender="PGTable" styleClass="btn delete">                                    
+                    <apex:param name="Del" value="{!PG.counter}" assignTo="{!delSolutionCounter}"/>                
+                </apex:commandButton>
+            </apex:column>  
+        </apex:pageBlockTable>                     
+                    
+                
+                    </apex:outputPanel>
+                    <apex:outputText value="" styleClass="dataCol first "/>                                        
+                </apex:pageBlockSection>                    
+                <apex:commandButton value="{!'< ' + $Label.BP_Prev}" action="{!prevTab}" reRender="tabPanel" styleClass="btn prev" oncomplete="scroll(0, 0)"/>
+                <apex:commandButton value="{!$Label.BP_Next + ' >'}" action="{!nextTab}" reRender="tabPanel,errors" styleClass="btn next" oncomplete="scroll(0, 0)"/>                
+            </apex:tab>
+            <apex:tab label="{!$Label.BP_Resources}" name="5" disabled="{!trainingTabEnabled}" ontabenter="tabChange('5')">
+            
+            <p class="larger"><span class="bluehead">{!$Label.BP_Nominate_your_resources_for_enablement}</span><br/>
+            {!$Label.BP_Based_on_your_Routes_to_Market_and_Product_Groups_selected_now_nominate_your}
+            </p>
+            <br/>             
+
+            <apex:pageBlockSection columns="1">
+                <apex:pageblocksectionItem >
+                    <apex:outputlabel value="{!$Label.BP_Route_to_Market}" for="TrRTMvalues" />
+                    <apex:selectList value="{!TrainingRTM}" size="1" id="TrRTMvalues">
+                        <apex:actionSupport event="onchange" reRender="tabPanel,TrRTMPGs" action="{!clearTrainingPG}" status="msg_refresh1"/>
+                        <apex:selectOptions value="{!TrainingRTMs}"/>
+                    </apex:selectList>
+                </apex:pageblocksectionItem>
+                <apex:pageblocksectionItem >
+                    <apex:outputlabel value="{!$Label.BP_Product_Group}" for="TrRTMPGs" />
+                    <apex:selectList value="{!TrainingPG}" size="1" id="TrRTMPGs">
+                        <apex:selectOptions value="{!TrainingPGs}"/>
+                    </apex:selectList>
+                </apex:pageblocksectionItem>                 
+                <apex:pageblocksectionItem >
+                    <apex:outputlabel value="{!$Label.BP_Resource_Type}" for="TrRTs" />
+                    <apex:selectList value="{!TrainingRT}" size="1" id="TrRTs">
+                        <apex:selectOptions value="{!ResourceTypes}"/>
+                    </apex:selectList>
+                </apex:pageblocksectionItem> 
+                
+                <apex:pageblocksectionItem >
+                    <apex:outputlabel value="{!$Label.BP_Number_of_Resources}" for="NumRes" />
+                    <apex:inputtext size="2" styleClass="text-right" value="{!TrainingCount}" id="NumRes"/>
+                </apex:pageblocksectionItem>                                
+             </apex:pageblocksection> 
+            <br/>
+            <br/>            
+           <apex:commandButton value="{!'+ ' + $Label.BP_Add}" action="{!AddTrainingRows}" rerender="tabPanel,errors" styleClass="btn add second-column"/>                                    
+            <apex:outputText value="" styleClass="dataCol first "/>
+                                   
+           <apex:actionStatus id="msg_refresh1" stopText="">
+                 <apex:facet name="start">
+                      <apex:outputPanel >
+                            <div style="background-color: #dbeefd; opacity: .80; -moz-opacity: 0.80; filter:alpha(opacity=80); position: absolute; left:0;top:0; width:100%; height:100%; z-index: 3;"><apex:image value="/img/loading32.gif" style="height: 40px; position: relative; left:400px;top:200px;"/></div>
+                        </apex:outputPanel>
+                    </apex:facet>
+             </apex:actionStatus>
+            <br/> 
+            <table class="territory fullwidth">
+              <tr width="100%" class="territory-row">
+                <th align="center">{!$Label.BP_Route_to_Market}</th>
+                <th align="center">{!$Label.BP_Product_Group}</th>                
+                <th align="center">{!$Label.BP_Resource_Type}</th> 
+                <th align="center">{!$Label.BP_Resource_Name}</th>
+                <th align="center">{!$Label.BP_Resource_Email}</th>
+                <th align="center">  </th>                            
+              </tr>
+              
+              <apex:repeat value="{!TrAlliancePGs}" var="pg">  
+                  <apex:variable var="i" value="{!0}"/>               
+                  <apex:repeat value="{!pg.myBPTrainingContacts}" var="bptc">
+                      <apex:variable var="j" value="{!i}.{!pg.myRTM}.{!pg.myPG}.{!bptc.Resource_Type__c}"/>
+                      <tr width="100%" class="territory-row">   
+                        <td>{!pg.myRTM}</td>
+                        <td>{!pg.myPG}</td>
+                        <td>{!bptc.Resource_Type__c}</td>    
+                        <td width="25%">
+                            <div id="targetContact.{!j}" style="float:left;font-size:12px">{!bptc.Test_Contact_Name__c}</div> &nbsp;  
+                                <a href="#" onclick="openContactLookup('CAEndUserContactSearch', '{!$Component.hdnContactName}' , 'hdnContactID.{!j}', 'targetContact.{!j}', 'tstContName.{!j}'); return false"> 
+                                    <img title="Contact Lookup (New Window)" class="lookupIcon" alt="Contact Lookup (New Window)" src="/s.gif"/>                
+                                </a>
+                                
+                                <!--<apex:inputHidden id="ContactName" value="{!bptc.Test_Contact_Name__c}"/>
+                                <apex:inputHidden id="TrContactId" value="{!bptc.Contact__c}"/>-->
+                                
+                                <input type="hidden" id="hdnContactID.{!j}" name="hdnContactID.{!j}"/>
+                                <input type="hidden" id="tstContName.{!j}" name="tstContName.{!j}"/>
+
+                         </td>
+                         <td>{!bptc.Resource_Email__c}</td>
+                         <td>
+                                <apex:commandButton value="X" action="{!delAllTrRow}" rerender="tabPanel,errors" styleClass="btn delete">                                    
+                                    <apex:param name="Del" value="{!i}" assignTo="{!delTrainingKey}"/>
+                                    <apex:param name="Del1" value="{!pg.myPG}" assignTo="{!delTrainingPG}"/>                
+                                </apex:commandButton>                         
+                         </td>                          
+                      </tr>
+                      <apex:variable var="i" value="{!i+1}"/>
+                   </apex:repeat>
+               </apex:repeat>
+               
+             <apex:repeat value="{!TrSolProPGs}" var="pg">  
+                  <apex:variable var="i" value="{!0}"/>               
+                  <apex:repeat value="{!pg.myBPTrainingContacts}" var="bptc">
+                      <apex:variable var="j" value="{!i}.{!pg.myRTM}.{!pg.myPG}.{!bptc.Resource_Type__c}"/>
+                      <tr width="100%" class="territory-row">   
+                        <td>{!pg.myRTM}</td>
+                        <td>{!pg.myPG}</td>
+                        <td>{!bptc.Resource_Type__c}</td>    
+                        <td width="25%">
+                            <div id="targetContact.{!j}" style="float:left;font-size:12px">{!bptc.Test_Contact_Name__c}</div> &nbsp;  
+                                <a href="#" onclick="openContactLookup('CAEndUserContactSearch', '{!$Component.hdnContactName}' , 'hdnContactID.{!j}', 'targetContact.{!j}', 'tstContName.{!j}'); return false"> 
+                                    <img title="Contact Lookup (New Window)" class="lookupIcon" alt="Contact Lookup (New Window)" src="/s.gif"/>                
+                                </a>
+                                
+                                <!--<apex:inputHidden id="ContactName" value="{!bptc.Test_Contact_Name__c}"/>
+                                <apex:inputHidden id="TrContactId" value="{!bptc.Contact__c}"/>-->
+                                
+                                <input type="hidden" id="hdnContactID.{!j}" name="hdnContactID.{!j}"/>
+                                <input type="hidden" id="tstContName.{!j}" name="tstContName.{!j}"/>
+
+                         </td> 
+                         <td>{!bptc.Resource_Email__c}</td>
+                         <td>
+                                <apex:commandButton value="X" action="{!delSolTrRow}" rerender="tabPanel,errors" styleClass="btn delete">                                    
+                                    <apex:param name="Del" value="{!i}" assignTo="{!delTrainingKey}"/>
+                                    <apex:param name="Del1" value="{!pg.myPG}" assignTo="{!delTrainingPG}"/>                
+                                </apex:commandButton>                         
+                         </td>                                                  
+                      </tr>
+                      <apex:variable var="i" value="{!i+1}"/>
+                   </apex:repeat>
+               </apex:repeat>
+               
+              <apex:repeat value="{!TrSerProPGs}" var="pg">  
+                  <apex:variable var="i" value="{!0}"/>               
+                  <apex:repeat value="{!pg.myBPTrainingContacts}" var="bptc">
+                      <apex:variable var="j" value="{!i}.{!pg.myRTM}.{!pg.myPG}.{!bptc.Resource_Type__c}"/>
+                      <tr width="100%" class="territory-row">   
+                        <td>{!pg.myRTM}</td>
+                        <td>{!pg.myPG}</td>
+                        <td>{!bptc.Resource_Type__c}</td>    
+                        <td width="25%">
+                            <div id="targetContact.{!j}" style="float:left;font-size:12px">{!bptc.Test_Contact_Name__c}</div> &nbsp;  
+                                <a href="#" onclick="openContactLookup('CAEndUserContactSearch', '{!$Component.hdnContactName}' , 'hdnContactID.{!j}', 'targetContact.{!j}', 'tstContName.{!j}'); return false"> 
+                                    <img title="Contact Lookup (New Window)" class="lookupIcon" alt="Contact Lookup (New Window)" src="/s.gif"/>                
+                                </a>
+                                
+                                <!--<apex:inputHidden id="ContactName" value="{!bptc.Test_Contact_Name__c}"/>
+                                <apex:inputHidden id="TrContactId" value="{!bptc.Contact__c}"/>-->
+                                
+                                <input type="hidden" id="hdnContactID.{!j}" name="hdnContactID.{!j}"/>
+                                <input type="hidden" id="tstContName.{!j}" name="tstContName.{!j}"/>
+
+                         </td>
+                         <td>{!bptc.Resource_Email__c}</td>
+                         <td>
+                                <apex:commandButton value="X" action="{!delSerTrRow}" rerender="tabPanel,errors" styleClass="btn delete">                                    
+                                    <apex:param name="Del" value="{!i}" assignTo="{!delTrainingKey}"/>
+                                    <apex:param name="Del1" value="{!pg.myPG}" assignTo="{!delTrainingPG}"/>                
+                                </apex:commandButton>                         
+                         </td>                                                   
+                      </tr>
+                      <apex:variable var="i" value="{!i+1}"/>
+                   </apex:repeat>
+               </apex:repeat>
+               
+              <apex:repeat value="{!TrDMPGs}" var="pg">  
+                  <apex:variable var="i" value="{!0}"/>               
+                  <apex:repeat value="{!pg.myBPTrainingContacts}" var="bptc">
+                      <apex:variable var="j" value="{!i}.{!pg.myRTM}.{!pg.myPG}.{!bptc.Resource_Type__c}"/>
+                      <tr width="100%" class="territory-row">   
+                        <td>{!pg.myRTM}</td>
+                        <td>{!pg.myPG}</td>
+                        <td>{!bptc.Resource_Type__c}</td>    
+                        <td width="25%">
+                            <div id="targetContact.{!j}" style="float:left;font-size:12px">{!bptc.Test_Contact_Name__c}</div> &nbsp;  
+                                <a href="#" onclick="openContactLookup('CAEndUserContactSearch', '{!$Component.hdnContactName}' , 'hdnContactID.{!j}', 'targetContact.{!j}', 'tstContName.{!j}'); return false"> 
+                                    <img title="Contact Lookup (New Window)" class="lookupIcon" alt="Contact Lookup (New Window)" src="/s.gif"/>                
+                                </a>
+                                
+                                <!--<apex:inputHidden id="ContactName" value="{!bptc.Test_Contact_Name__c}"/>
+                                <apex:inputHidden id="TrContactId" value="{!bptc.Contact__c}"/>-->
+                                
+                                <input type="hidden" id="hdnContactID.{!j}" name="hdnContactID.{!j}"/>
+                                <input type="hidden" id="tstContName.{!j}" name="tstContName.{!j}"/>
+
+                         </td> 
+                         <td>{!bptc.Resource_Email__c}</td>
+                         <td>
+                                <apex:commandButton value="X" action="{!delDMTrRow}" rerender="tabPanel,errors" styleClass="btn delete">                                    
+                                    <apex:param name="Del" value="{!i}" assignTo="{!delTrainingKey}"/>
+                                    <apex:param name="Del1" value="{!pg.myPG}" assignTo="{!delTrainingPG}"/>                
+                                </apex:commandButton>                         
+                         </td>                                                  
+                      </tr>
+                      <apex:variable var="i" value="{!i+1}"/>
+                   </apex:repeat>
+               </apex:repeat>               
+             </table>
+                   
+                       
+                            
+                            
+                            
+                            
+                       <!-- <table class="territory">
+                          <tr width="100%" class="territory-row">
+                            <th align="center" width="25%">Route To Market</th>
+                            <th align="center" width="30%">Product Group</th>
+                            <th align="center" width="40%">Course Details (Name, Code, Duration in hours)</th>
+                            <th align="center" width="15%">Resource Type</th> 
+                            <th align="center" width="30%">Resource Name</th>                            
+                          </tr>
+                         
+                          
+                          <apex:repeat value="{!AddedPGs}" var="pg"> 
+                          <apex:variable var="i" value="{!0}"/> 
+                          
+                          <apex:repeat value="{!pg.myBPTrainingContacts}" var="bptc"> 
+                           
+                          <apex:variable var="j" value="{!i}.{!pg.myRTM}.{!pg.myPG}.{!bptc.Resource_Type__c}"/>
+                          <apex:variable var="k" value="{!0}"/>
+
+                          <tr width="100%" class="territory-row">
+                            <td width="20%">{!pg.myRTM}</td>
+                            <td width="20%">{!pg.myPG}</td>
+                            <td>
+                            <table class="details">
+                            <apex:repeat value="{!TempTrainingMap[j]}" var="courses"> 
+                                <tr>
+                                    <td><strong>{!courses.Combined_Course_Name__c}</strong><br />{!courses.Combined_Course_Code__c}, {!courses.Duration_1__c}</td>
+
+                                    <apex:outputpanel layout="none" rendered="{!courses.Completed__c}">
+                                        <td><input type="checkbox" name="{!j}.{!k}" checked="checked"/></td>
+                                    </apex:outputpanel>
+                                     <apex:outputpanel layout="none" rendered="{!!courses.Completed__c}">
+                                        <td><input type="checkbox" name="{!j}.{!k}"/></td>
+                                    </apex:outputpanel>                                    
+                                </tr>
+                            <apex:variable var="k" value="{!k+1}"/>
+                            </apex:repeat>
+                            </table>
+                            </td>
+                            <td width="20%">{!bptc.Resource_Type__c}</td>
+                            <td width="40%">
+                            <apex:variable var="z" value="!$Component.hdnContactID.{!j}"/>
+                                 <apex:outputPanel styleClass="requiredInput" layout="block" >
+                                    <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+                                     <div id="targetContact.{!j}" style="float:left;font-size:12px">{!bptc.Test_Contact_Name__c}</div> &nbsp;  
+                                        <a href="#" onclick="openContactLookup('CAEndUserContactSearch', '{!$Component.hdnContactName}' , 'hdnContactID.{!j}', 'targetContact.{!j}', 'tstContName.{!j}'); return false"> 
+                                            <img title="Contact Lookup (New Window)" class="lookupIcon" alt="Contact Lookup (New Window)" src="/s.gif"/>                
+                                        </a>
+                                 </apex:outputPanel>
+
+                                <input type="hidden" id="hdnContactID.{!j}" name="hdnContactID.{!j}"/>
+                                <input type="hidden" id="tstContName.{!j}" name="tstContName.{!j}"/>
+
+                            </td>                          
+                          </tr> 
+                          <apex:variable var="i" value="{!i+1}"/>
+                          </apex:repeat>
+                          </apex:repeat>
+                         </table>-->
+                <br></br>
+                <br></br>                                                                                                
+
+                <apex:commandButton value="{!'< ' + $Label.BP_Prev}" action="{!prevTab}" reRender="tabPanel" styleClass="btn prev" oncomplete="scroll(0, 0)"/>
+                <apex:commandButton value="{!$Label.BP_Next + ' >'}" action="{!nextTab}" reRender="tabPanel,errors" styleClass="btn next" oncomplete="scroll(0, 0)"/>                
+            </apex:tab> 
+            
+            <apex:tab label="{!$Label.BP_Booking_Targets}" name="6" disabled="{!revenueTabEnabled}" ontabenter="tabChange('6')">
+            <p class="larger"><span class="bluehead">{!$Label.BP_Set_the_quarterly_sales_targets_for_each_focus_solution}</span><br/>
+            {!$Label.BP_Now_that_you_have_selected_your_Solutions_and_nominated_your_Training_contact}
+            </p>
+            <br/> 
+<!--               <apex:pageBlockSection columns="1">
+                    <apex:pageblocksectionItem >
+                        <apex:outputlabel value="Route to Market" for="BookRTMvalues" />
+                        <apex:selectList value="{!BookingRTM}" size="1" id="BookRTM">
+                            <apex:actionSupport event="onchange" reRender="BookBU,BookPG" action="{!clearBookingBUPG}" status="Refreshing"/>
+                            <apex:selectOptions value="{!RTMs}"/>
+                        </apex:selectList>
+                    </apex:pageblocksectionItem>
+                    
+                    <apex:pageblockSectionItem >
+                        <apex:outputLabel value="GEO"/>
+                        <aclonedBP="{!Business_Plan_New__c.GEO__c}"/>
+                    </apex:pageblockSectionItem>                     
+                    
+                    <apex:pageblocksectionItem >
+                        <apex:outputlabel value="Sales Coverage Business Unit" for="BookBU" />
+                        <apex:selectList value="{!BookingBU}" size="1" id="BookBU">
+                            <apex:actionSupport event="onchange" reRender="BookPG" status="Refreshing"/>
+                            <apex:selectOptions value="{!BookingBUs}"/>
+                        </apex:selectList>
+                    </apex:pageblocksectionItem>    
+                    
+                    <apex:pageblocksectionItem >
+                        <apex:outputlabel value="Product Group" for="BookPG" />
+                        <apex:selectList value="{!BookingPG}" size="1" id="BookPG">
+                            <apex:selectOptions value="{!BookingPGs}"/>
+                        </apex:selectList>
+                    </apex:pageblocksectionItem>  
+
+                    <apex:pageblocksectionItem >
+                        <apex:outputlabel value="Booking Type" for="BookRT" />
+                        <apex:selectList value="{!selectedRevType}" size="1" id="BookRT">
+                            <apex:selectOptions value="{!RevenueTypes}"/>
+                        </apex:selectList>
+                    </apex:pageblocksectionItem>
+                    
+                    <apex:pageblockSectionItem >
+                        <apex:outputLabel value="Q1"/>
+                        <apex:inputText value="{!revQ1}"/>
+                    </apex:pageblockSectionItem>                    
+
+                    <apex:pageblockSectionItem >
+                        <apex:outputLabel value="Q2"/>
+                        <apex:inputText value="{!revQ2}"/>
+                    </apex:pageblockSectionItem>
+                    
+                    <apex:pageblockSectionItem >
+                        <apex:outputLabel value="Q3"/>
+                        <apex:inputText value="{!revQ3}"/>
+                    </apex:pageblockSectionItem>
+                    
+                    <apex:pageblockSectionItem >
+                        <apex:outputLabel value="Q4"/>
+                        <apex:inputText value="{!revQ4}"/>
+                    </apex:pageblockSectionItem>                                       
+                    
+                    <apex:actionStatus id="Refreshing" startText="Loading..." stopText=""/>    
+                    <apex:outputText value="" styleClass="dataCol first "/>
+                    <apex:commandButton value="Add" action="{!AddBookingTarget}" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" style="background-color:orange;background-image:none;"/>                                    
+               </apex:pageblocksection> -->
+               
+               <apex:pageBlockSection title="{!$Label.BP_Booking_Targets}" columns="1">                                                     
+                    <apex:outputPanel id="PGTable1">
+                        <apex:outputPanel rendered="{!allianceBookingExists}">
+                        <apex:outputText style="font-weight:bold;"  value="{!$ObjectType.Business_Plan_New__c.Fields.Alliance__c.Label}" rendered="{!allianceBookingExists}"/>
+                        <table class="territory">
+                          <tr class="territory-row">
+                            <th>{!$Label.BP_Business_Unit}</th>
+                            <th>{!$Label.BP_Product_Group}</th>
+                            <th>{!$Label.BP_GEO}</th>
+                            <th>{!$Label.BP_Booking_Type}</th> 
+                            <th class="text-right">{!$Label.BP_Q1} ({!clonedBP.Creator_Currency__c})</th>
+                            <th class="text-right">{!$Label.BP_Q2} ({!clonedBP.Creator_Currency__c})</th>
+                            <th class="text-right">{!$Label.BP_Q3} ({!clonedBP.Creator_Currency__c})</th>
+                            <th class="text-right">{!$Label.BP_Q4} ({!clonedBP.Creator_Currency__c})</th>
+                            <th>{!$Label.BP_Total_Annual}({!clonedBP.Creator_Currency__c})</th>                                                                                                                                                                       
+                          </tr>
+                          <apex:repeat value="{!AlliancePGs}" var="pg">                          
+                          <tr class="territory-row">
+                            <td width="20%" rowspan="3" class="bgnone">{!pg.myBU}</td>
+                            <td width="20%" rowspan="3" class="bgnone">{!pg.myPG}</td>
+                            <td width="5%" rowspan="3" class="bgnone"><apex:outputText value="{!clonedBP.GEO__c}"/></td>
+                            <td width="5%" class=" highlight">Product</td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="AllPQ1" size="10" value="{!pg.PQ1}" styleClass="text-right"><apex:actionSupport focus="AllPQ2" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="AllPQ2" size="10" value="{!pg.PQ2}" styleClass="text-right"><apex:actionSupport focus="AllPQ3" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="AllPQ3" size="10" value="{!pg.PQ3}" styleClass="text-right"><apex:actionSupport focus="AllPQ4" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="AllPQ4" size="10" value="{!pg.PQ4}" styleClass="text-right"><apex:actionSupport focus="AllSQ1" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!pg.PNCVTotal}"/></apex:outputText></td>                                                                                                                                                                        
+                          </tr>
+                          <tr class="territory-row">
+                            <td width="5%" class=" highlight">Services</td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="AllSQ1" size="10" value="{!pg.SQ1}" styleClass="text-right"><apex:actionSupport focus="AllSQ2" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="AllSQ2" size="10" value="{!pg.SQ2}" styleClass="text-right"><apex:actionSupport focus="AllSQ3" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="AllSQ3" size="10" value="{!pg.SQ3}" styleClass="text-right"><apex:actionSupport focus="AllSQ4" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="AllSQ4" size="10" value="{!pg.SQ4}" styleClass="text-right"><apex:actionSupport focus="AllEQ1" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!pg.SNCVTotal}"/></apex:outputText></td>
+                          </tr>
+                          <tr class="territory-row">
+                            <td width="5%" class=" highlight">Education</td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="AllEQ1" size="10" value="{!pg.EQ1}" styleClass="text-right"><apex:actionSupport focus="AllEQ2" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="AllEQ2" size="10" value="{!pg.EQ2}" styleClass="text-right"><apex:actionSupport focus="AllEQ3" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="AllEQ3" size="10" value="{!pg.EQ3}" styleClass="text-right"><apex:actionSupport focus="AllEQ4" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="AllEQ4" size="10" value="{!pg.EQ4}" styleClass="text-right"><apex:actionSupport focus="AllEQ4" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!pg.ENCVTotal}"/></apex:outputText></td>
+                          </tr> 
+                          </apex:repeat>
+                          <tr class="territory-row">
+                            <td width="5%" colspan="4" class="total">Total</td>
+                            <td width="10%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!allianceBookingQ1Total}"/></apex:outputText></td>
+                            <td width="10%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!allianceBookingQ2Total}"/></apex:outputText></td>
+                            <td width="10%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!allianceBookingQ3Total}"/></apex:outputText></td>
+                            <td width="10%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!allianceBookingQ4Total}"/></apex:outputText></td>
+                            <td width="10%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!allianceTotal}"/></apex:outputText></td>
+                          </tr>                          
+                         
+                        </table> 
+                        </apex:outputPanel>
+                        
+                        <apex:outputPanel rendered="{!SolProBookingExists}">   
+                        <br></br>                        
+                        <apex:outputText style="font-weight:bold;" value="{!$ObjectType.Business_Plan_New__c.Fields.Solution_Provider__c.Label}" rendered="{!SolProBookingExists}"/>                                             
+                        <table class="territory">
+                          <tr class="territory-row">
+                            <th>{!$Label.BP_Business_Unit}</th>
+                            <th>{!$Label.BP_Product_Group}</th>
+                            <th>{!$Label.BP_GEO}</th>
+                            <th>{!$Label.BP_Booking_Type}</th> 
+                            <th class="text-right">{!$Label.BP_Q1} ({!clonedBP.Creator_Currency__c})</th>
+                            <th class="text-right">{!$Label.BP_Q2} ({!clonedBP.Creator_Currency__c})</th>
+                            <th class="text-right">{!$Label.BP_Q3} ({!clonedBP.Creator_Currency__c})</th>
+                            <th class="text-right">{!$Label.BP_Q4} ({!clonedBP.Creator_Currency__c})</th>
+                            <th>Total Annual({!clonedBP.Creator_Currency__c})</th>                                                                                                                                                                       
+                          </tr>
+                          <apex:repeat value="{!SolProPGs}" var="pg">                          
+                          <tr class="territory-row">
+                            <td width="20%" rowspan="3" class="bgnone">{!pg.myBU}</td>
+                            <td width="20%" rowspan="3" class="bgnone">{!pg.myPG}</td>
+                            <td width="5%" rowspan="3" class="bgnone"><apex:outputText value="{!clonedBP.GEO__c}"/></td>
+                            <td width="5%" class=" highlight">Product</td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="SolPQ1" size="10" value="{!pg.PQ1}" styleClass="text-right"><apex:actionSupport focus="SolPQ2" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="SolPQ2" size="10" value="{!pg.PQ2}" styleClass="text-right"><apex:actionSupport focus="SolPQ3" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="SolPQ3" size="10" value="{!pg.PQ3}" styleClass="text-right"><apex:actionSupport focus="SolPQ4" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="SolPQ4" size="10" value="{!pg.PQ4}" styleClass="text-right"><apex:actionSupport focus="SolSQ1" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!pg.PNCVTotal}"/></apex:outputText></td>                                                                                                                                                                        
+                          </tr>
+                          <tr class="territory-row">
+                            <td width="5%" class=" highlight">Services</td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="SolSQ1" size="10" value="{!pg.SQ1}" styleClass="text-right"><apex:actionSupport focus="SolSQ2" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="SolSQ2" size="10" value="{!pg.SQ2}" styleClass="text-right"><apex:actionSupport focus="SolSQ3" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="SolSQ3" size="10" value="{!pg.SQ3}" styleClass="text-right"><apex:actionSupport focus="SolSQ4" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="SolSQ4" size="10" value="{!pg.SQ4}" styleClass="text-right"><apex:actionSupport focus="SolEQ1" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!pg.SNCVTotal}"/></apex:outputText></td>
+                          </tr>
+                          <tr class="territory-row">
+                            <td width="5%" class=" highlight">Education</td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="SolEQ1" size="10" value="{!pg.EQ1}" styleClass="text-right"><apex:actionSupport focus="SolEQ2" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="SolEQ2" size="10" value="{!pg.EQ2}" styleClass="text-right"><apex:actionSupport focus="SolEQ3" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="SolEQ3" size="10" value="{!pg.EQ3}" styleClass="text-right"><apex:actionSupport focus="SolEQ4" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="SolEQ4" size="10" value="{!pg.EQ4}" styleClass="text-right"><apex:actionSupport focus="SolEQ4" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!pg.ENCVTotal}"/></apex:outputText></td>
+                          </tr> 
+                          </apex:repeat>                          
+                          <tr class="territory-row">
+                            <td width="5%" colspan="4" class="total">Total</td>
+                            <td width="10%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SolProBookingQ1Total}"/></apex:outputText></td>
+                            <td width="10%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SolProBookingQ2Total}"/></apex:outputText></td>
+                            <td width="10%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SolProBookingQ3Total}"/></apex:outputText></td>
+                            <td width="10%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SolProBookingQ4Total}"/></apex:outputText></td>
+                            <td width="10%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SolProTotal}"/></apex:outputText></td>
+                          </tr>                          
+                        </table> 
+                        </apex:outputPanel>
+                        
+                        <apex:outputPanel rendered="{!SerProBookingExists}"> 
+                        <br></br> 
+                        <apex:outputText style="font-weight:bold;" value="{!$ObjectType.Business_Plan_New__c.Fields.Service_Provider__c.Label}" rendered="{!SerProBookingExists}"/>                                              
+                        <table class="territory">
+                          <tr  class="territory-row">
+                            <th>{!$Label.BP_Business_Unit}</th>
+                            <th>{!$Label.BP_Product_Group}</th>
+                            <th>{!$Label.BP_GEO}</th>
+                            <th>{!$Label.BP_Booking_Type}</th> 
+                            <th class="text-right">{!$Label.BP_Q1} ({!clonedBP.Creator_Currency__c})</th>
+                            <th class="text-right">{!$Label.BP_Q2} ({!clonedBP.Creator_Currency__c})</th>
+                            <th class="text-right">{!$Label.BP_Q3} ({!clonedBP.Creator_Currency__c})</th>
+                            <th class="text-right">{!$Label.BP_Q4} ({!clonedBP.Creator_Currency__c})</th>
+                            <th>Total Annual({!clonedBP.Creator_Currency__c})</th>                                                                                                                                                                       
+                          </tr>
+                          <apex:repeat value="{!SerProPGs}" var="pg">                          
+                          <tr class="territory-row">
+                            <td width="20%" rowspan="3" class="bgnone">{!pg.myBU}</td>
+                            <td width="20%" rowspan="3" class="bgnone">{!pg.myPG}</td>
+                            <td width="5%" rowspan="3" class="bgnone"><apex:outputText value="{!clonedBP.GEO__c}"/></td>
+                            <td width="5%" class=" highlight">Product</td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="SerPQ1" size="10" value="{!pg.PQ1}" styleClass="text-right"><apex:actionSupport focus="SerPQ2" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="SerPQ2" size="10" value="{!pg.PQ2}" styleClass="text-right"><apex:actionSupport focus="SerPQ3" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="SerPQ3" size="10" value="{!pg.PQ3}" styleClass="text-right"><apex:actionSupport focus="SerPQ4" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="SerPQ4" size="10" value="{!pg.PQ4}" styleClass="text-right"><apex:actionSupport focus="SerSQ1" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!pg.PNCVTotal}"/></apex:outputText></td>                                                                                                                                                                        
+                          </tr>
+                          <tr class="territory-row">
+                            <td width="5%" class=" highlight">Services</td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="SerSQ1" size="10" value="{!pg.SQ1}" styleClass="text-right"><apex:actionSupport focus="SerSQ2" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="SerSQ2" size="10" value="{!pg.SQ2}" styleClass="text-right"><apex:actionSupport focus="SerSQ3" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="SerSQ3" size="10" value="{!pg.SQ3}" styleClass="text-right"><apex:actionSupport focus="SerSQ4" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="SerSQ4" size="10" value="{!pg.SQ4}" styleClass="text-right"><apex:actionSupport focus="SerEQ1" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!pg.SNCVTotal}"/></apex:outputText></td>
+                          </tr>
+                          <tr class="territory-row">
+                            <td width="5%" class=" highlight">Education</td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="SerEQ1" size="10" value="{!pg.EQ1}" styleClass="text-right"><apex:actionSupport focus="SerEQ2" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="SerEQ2" size="10" value="{!pg.EQ2}" styleClass="text-right"><apex:actionSupport focus="SerEQ3" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="SerEQ3" size="10" value="{!pg.EQ3}" styleClass="text-right"><apex:actionSupport focus="SerEQ4" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="SerEQ4" size="10" value="{!pg.EQ4}" styleClass="text-right"><apex:actionSupport focus="SerEQ4" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!pg.ENCVTotal}"/></apex:outputText></td>
+                          </tr> 
+                          </apex:repeat>                         
+                          <tr class="territory-row">
+                            <td width="5%" colspan="4" class="total">Total</td>
+                            <td width="10%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SerProBookingQ1Total}"/></apex:outputText></td>
+                            <td width="10%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SerProBookingQ2Total}"/></apex:outputText></td>
+                            <td width="10%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!serProBookingQ3Total}"/></apex:outputText></td>
+                            <td width="10%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SerProBookingQ4Total}"/></apex:outputText></td>
+                            <td width="10%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SerProTotal}"/></apex:outputText></td>
+                          </tr>                          
+
+                        </table> 
+                        </apex:outputPanel>
+                        
+                        <apex:outputPanel rendered="{!DMBookingExists}">   
+                        <br></br> 
+                        <apex:outputText style="font-weight:bold;" value="{!$ObjectType.Business_Plan_New__c.Fields.Data_Management__c.Label}" rendered="{!DMBookingExists}"/>                                             
+                        <table class="territory fullwidth">
+                          <tr class="territory-row">
+                            <th>{!$Label.BP_Business_Unit}</th>
+                            <th>{!$Label.BP_Product_Group}</th>
+                            <th>{!$Label.BP_GEO}</th>
+                            <th>{!$Label.BP_Booking_Type}</th> 
+                            <th class="text-right">{!$Label.BP_Q1} ({!clonedBP.Creator_Currency__c})</th>
+                            <th class="text-right">{!$Label.BP_Q2} ({!clonedBP.Creator_Currency__c})</th>
+                            <th class="text-right">{!$Label.BP_Q3} ({!clonedBP.Creator_Currency__c})</th>
+                            <th class="text-right">{!$Label.BP_Q4} ({!clonedBP.Creator_Currency__c})</th>
+                            <th>Total Annual({!clonedBP.Creator_Currency__c})</th>                                                                                                                                                                       
+                          </tr>
+                          <apex:repeat value="{!DMPGs}" var="pg">                          
+                          <tr class="territory-row">
+                            <td width="20%" rowspan="3" class="bgnone">{!pg.myBU}</td>
+                            <td width="20%" rowspan="3" class="bgnone">{!pg.myPG}</td>
+                            <td width="5%" rowspan="3" class="bgnone"><apex:outputText value="{!clonedBP.GEO__c}"/></td>
+                            <td width="5%" class=" highlight">Product</td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="DMPQ1" size="10" value="{!pg.PQ1}" styleClass="text-right"><apex:actionSupport focus="DMPQ2" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="DMPQ2" size="10" value="{!pg.PQ2}" styleClass="text-right"><apex:actionSupport focus="DMPQ3" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="DMPQ3" size="10" value="{!pg.PQ3}" styleClass="text-right"><apex:actionSupport focus="DMPQ4" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="DMPQ4" size="10" value="{!pg.PQ4}" styleClass="text-right"><apex:actionSupport focus="DMSQ1" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!pg.PNCVTotal}"/></apex:outputText></td>                                                                                                                                                                        
+                          </tr>
+                          <tr class="territory-row">
+                            <td width="5%" class=" highlight">Services</td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="DMSQ1" size="10" value="{!pg.SQ1}" styleClass="text-right"><apex:actionSupport focus="DMSQ2" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="DMSQ2" size="10" value="{!pg.SQ2}" styleClass="text-right"><apex:actionSupport focus="DMSQ3" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="DMSQ3" size="10" value="{!pg.SQ3}" styleClass="text-right"><apex:actionSupport focus="DMSQ4" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="DMSQ4" size="10" value="{!pg.SQ4}" styleClass="text-right"><apex:actionSupport focus="DMEQ1" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!pg.SNCVTotal}"/></apex:outputText></td>
+                          </tr>
+                          <tr class="territory-row">
+                            <td width="5%" class=" highlight">Education</td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="DMEQ1" size="10" value="{!pg.EQ1}" styleClass="text-right"><apex:actionSupport focus="DMEQ2" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="DMEQ2" size="10" value="{!pg.EQ2}" styleClass="text-right"><apex:actionSupport focus="DMEQ3"  event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="DMEQ3" size="10" value="{!pg.EQ3}" styleClass="text-right"><apex:actionSupport focus="DMEQ4" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right highlight"><apex:inputtext id="DMEQ4" size="10" value="{!pg.EQ4}" styleClass="text-right"><apex:actionSupport focus="DMEQ4" event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev" status="msg_refresh"/></apex:inputtext></td>
+                            <td width="10%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!pg.ENCVTotal}"/></apex:outputText></td>
+                          </tr> 
+                          </apex:repeat>                         
+                          <tr class="territory-row">
+                            <td width="5%" colspan="4" class="total">Total</td>
+                            <td width="10%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!DMBookingQ1Total}"/></apex:outputText></td>
+                            <td width="10%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!DMBookingQ2Total}"/></apex:outputText></td>
+                            <td width="10%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!DMBookingQ3Total}"/></apex:outputText></td>
+                            <td width="10%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!DMBookingQ4Total}"/></apex:outputText></td>
+                            <td width="10%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!DMTotal}"/></apex:outputText></td>
+                          </tr>                          
+
+                        </table> 
+                        </apex:outputPanel>                                                                                               
+                    </apex:outputPanel>   
+                </apex:pageBlockSection>   
+                
+               <apex:pageblocksection title="{!$Label.BP_Summary_by_Booking_Type}" columns="1">
+                    <apex:outputpanel id="RevSummary">
+                        <table class="territory fullwidth">
+                          <tr class="territory-row">
+                            <th>{!$Label.BP_Route_to_Market}</th>
+                            <th>{!$Label.BP_GEO}</th>
+                            <th class="text-right">{!$Label.BP_Q1} ({!clonedBP.Creator_Currency__c})</th>
+                            <th class="text-right">{!$Label.BP_Q2} ({!clonedBP.Creator_Currency__c})</th>
+                            <th class="text-right">{!$Label.BP_Q3} ({!clonedBP.Creator_Currency__c})</th>
+                            <th class="text-right">{!$Label.BP_Q4} ({!clonedBP.Creator_Currency__c})</th>
+                            <th>{!$Label.BP_Total_Annual}({!clonedBP.Creator_Currency__c})</th>                                                                                                                                                                       
+                          </tr>
+                          <tr class="territory-row">                          
+                            <td class="section" colspan="7"><B>Product Booking</b></td>                          
+                          </tr>
+
+                    <apex:variable rendered="{!allianceBookingExists}" value="" var="tempOuter">
+                          <tr class="territory-row">
+                            <td width="20%" class="bgnone">{!$ObjectType.Business_Plan_New__c.Fields.Alliance__c.Label}</td>
+                            <td width="5%" class="bgnone"><apex:outputText value="{!clonedBP.GEO__c}"/></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!AlliancePNCVQ1Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!AlliancePNCVQ2Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!AlliancePNCVQ3Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!AlliancePNCVQ4Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!AlliancePNCVTotal}"/></apex:outputText></td>
+                          </tr>
+                      </apex:variable>
+    
+                      <apex:variable rendered="{!SolProBookingExists}" value="" var="tempOuter">  
+                          <tr class="territory-row">
+                            <td width="20%" class="bgnone">{!$ObjectType.Business_Plan_New__c.Fields.Solution_Provider__c.Label}</td>
+                            <td width="5%" class="bgnone"><apex:outputText value="{!clonedBP.GEO__c}"/></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SolProPNCVQ1Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SolProPNCVQ2Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SolProPNCVQ3Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SolProPNCVQ4Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SolProPNCVTotal}"/></apex:outputText></td>
+                          </tr>
+                       </apex:variable>
+                       
+                       <apex:variable rendered="{!SerProBookingExists}" value="" var="tempOuter">   
+                          <tr class="territory-row">
+                            <td width="20%" class="bgnone">{!$ObjectType.Business_Plan_New__c.Fields.Service_Provider__c.Label}</td>
+                            <td width="5%" class="bgnone"><apex:outputText value="{!clonedBP.GEO__c}"/></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SerProPNCVQ1Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SerProPNCVQ2Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SerProPNCVQ3Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SerProPNCVQ4Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SerProPNCVTotal}"/></apex:outputText></td>
+                          </tr>
+                       </apex:variable>
+                       <apex:variable rendered="{!DMBookingExists}" value="" var="tempOuter">   
+                          <tr class="territory-row">
+                            <td width="20%" class="bgnone">{!$ObjectType.Business_Plan_New__c.Fields.Data_Management__c.Label}</td>
+                            <td width="5%" class="bgnone"><apex:outputText value="{!clonedBP.GEO__c}"/></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!DMPNCVQ1Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!DMPNCVQ2Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!DMPNCVQ3Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!DMPNCVQ4Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!DMPNCVTotal}"/></apex:outputText></td>
+                          </tr>                                                                              
+                       </apex:variable>
+
+                          <tr width="100%" class="territory-row">
+                            <td width="20%" colspan="2" class="total">Total</td>
+                            <td width="15%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!PNCVQ1Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!PNCVQ2Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!PNCVQ3Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!PNCVQ4Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!pncvGrantTotal}"/></apex:outputText></td>
+                          </tr>
+
+                          <tr class="territory-row">                          
+                            <td class="section" colspan="7"><B>Services Booking</b></td>                          
+                          </tr>
+
+                    <apex:variable rendered="{!allianceBookingExists}" value="" var="tempOuter">
+                          <tr class="territory-row">
+                            <td width="20%" class="bgnone">{!$ObjectType.Business_Plan_New__c.Fields.Alliance__c.Label}</td>
+                            <td width="5%" class="bgnone"><apex:outputText value="{!clonedBP.GEO__c}"/></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!AllianceSNCVQ1Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!AllianceSNCVQ2Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!AllianceSNCVQ3Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!AllianceSNCVQ4Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!AllianceSNCVTotal}"/></apex:outputText></td>
+                          </tr>
+                      </apex:variable>
+    
+                      <apex:variable rendered="{!SolProBookingExists}" value="" var="tempOuter">  
+                          <tr class="territory-row">
+                            <td width="20%" class="bgnone">{!$ObjectType.Business_Plan_New__c.Fields.Solution_Provider__c.Label}</td>
+                            <td width="5%" class="bgnone"><apex:outputText value="{!clonedBP.GEO__c}"/></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SolProSNCVQ1Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SolProSNCVQ2Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SolProSNCVQ3Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SolProSNCVQ4Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SolProSNCVTotal}"/></apex:outputText></td>
+                          </tr>
+                       </apex:variable>
+                       
+                       <apex:variable rendered="{!SerProBookingExists}" value="" var="tempOuter">   
+                          <tr class="territory-row">
+                            <td width="20%" class="bgnone">{!$ObjectType.Business_Plan_New__c.Fields.Service_Provider__c.Label}</td>
+                            <td width="5%" class="bgnone"><apex:outputText value="{!clonedBP.GEO__c}"/></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SerProSNCVQ1Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SerProSNCVQ2Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SerProSNCVQ3Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SerProSNCVQ4Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SerProSNCVTotal}"/></apex:outputText></td>
+                          </tr>
+                       </apex:variable>
+                       <apex:variable rendered="{!DMBookingExists}" value="" var="tempOuter">   
+                          <tr class="territory-row">
+                            <td width="20%" class="bgnone">{!$ObjectType.Business_Plan_New__c.Fields.Data_Management__c.Label}</td>
+                            <td width="5%" class="bgnone"><apex:outputText value="{!clonedBP.GEO__c}"/></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!DMSNCVQ1Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!DMSNCVQ2Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!DMSNCVQ3Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!DMSNCVQ4Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!DMSNCVTotal}"/></apex:outputText></td>
+                          </tr>                                                                              
+                       </apex:variable>
+
+                          <tr width="100%" class="territory-row">
+                            <td width="20%" colspan="2" class="total">Total</td>
+                            <td width="15%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SNCVQ1Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SNCVQ2Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SNCVQ3Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SNCVQ4Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!sncvGrantTotal}"/></apex:outputText></td>
+                          </tr>
+                       
+                          <tr class="territory-row">                          
+                            <td class="section" colspan="7"><B>Education Booking</b></td>                          
+                          </tr>
+
+                    <apex:variable rendered="{!allianceBookingExists}" value="" var="tempOuter">
+                          <tr class="territory-row">
+                            <td width="20%" class="bgnone">{!$ObjectType.Business_Plan_New__c.Fields.Alliance__c.Label}</td>
+                            <td width="5%" class="bgnone"><apex:outputText value="{!clonedBP.GEO__c}"/></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!AllianceENCVQ1Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!AllianceENCVQ2Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!AllianceENCVQ3Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!AllianceENCVQ4Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!AllianceENCVTotal}"/></apex:outputText></td>
+                          </tr>
+                      </apex:variable>
+    
+                      <apex:variable rendered="{!SolProBookingExists}" value="" var="tempOuter">  
+                          <tr width="100%" class="territory-row">
+                            <td width="20%" class="bgnone">{!$ObjectType.Business_Plan_New__c.Fields.Solution_Provider__c.Label}</td>
+                            <td width="5%" class="bgnone"><apex:outputText value="{!clonedBP.GEO__c}"/></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SolProENCVQ1Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SolProENCVQ2Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SolProENCVQ3Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SolProENCVQ4Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SolProENCVTotal}"/></apex:outputText></td>
+                          </tr>
+                       </apex:variable>
+                       
+                       <apex:variable rendered="{!SerProBookingExists}" value="" var="tempOuter">   
+                          <tr width="100%" class="territory-row">
+                            <td width="20%" class="bgnone">{!$ObjectType.Business_Plan_New__c.Fields.Service_Provider__c.Label}</td>
+                            <td width="5%" class="bgnone"><apex:outputText value="{!clonedBP.GEO__c}"/></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SerProENCVQ1Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SerProENCVQ2Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SerProENCVQ3Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SerProENCVQ4Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SerProENCVTotal}"/></apex:outputText></td>
+                          </tr>
+                       </apex:variable>
+                       <apex:variable rendered="{!DMBookingExists}" value="" var="tempOuter">   
+                          <tr width="100%" class="territory-row">
+                            <td width="20%" class="bgnone">{!$ObjectType.Business_Plan_New__c.Fields.Data_Management__c.Label}</td>
+                            <td width="5%" class="bgnone"><apex:outputText value="{!clonedBP.GEO__c}"/></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!DMENCVQ1Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!DMENCVQ2Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!DMENCVQ3Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!DMENCVQ4Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!DMENCVTotal}"/></apex:outputText></td>
+                          </tr>                                                                              
+                       </apex:variable>                       
+
+                          <tr width="100%" class="territory-row">
+                            <td width="20%" colspan="2" class="total">Total</td>
+                            <td width="15%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!ENCVQ1Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!ENCVQ2Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!ENCVQ3Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!ENCVQ4Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!encvGrantTotal}"/></apex:outputText></td>
+                          </tr>
+
+                        </table> 
+                    </apex:outputpanel>
+                </apex:pageblocksection>
+                
+                <apex:pageblocksection title="{!$Label.BP_Summary_of_Target_Booking}" columns="1">
+                    <apex:outputpanel id="TargetRev">
+                        <table class="territory fullwidth">
+                          <tr class="territory-row">
+                            <th>{!$Label.BP_Route_to_Market}</th>
+                            <th>{!$Label.BP_GEO}</th>
+                            <th class="text-right">{!$Label.BP_Q1} ({!clonedBP.Creator_Currency__c})</th>
+                            <th class="text-right">{!$Label.BP_Q2} ({!clonedBP.Creator_Currency__c})</th>
+                            <th class="text-right">{!$Label.BP_Q3} ({!clonedBP.Creator_Currency__c})</th>
+                            <th class="text-right">{!$Label.BP_Q4} ({!clonedBP.Creator_Currency__c})</th>
+                            <th>{!$Label.BP_Total_Annual}({!clonedBP.Creator_Currency__c})</th>                                                                                                                                                                       
+                          </tr>
+
+                    <apex:variable rendered="{!allianceBookingExists}" value="" var="tempOuter">
+                          <tr class="territory-row">
+                            <td width="20%" class="bgnone">{!$ObjectType.Business_Plan_New__c.Fields.Alliance__c.Label}</td>
+                            <td width="5%" class="bgnone"><apex:outputText value="{!clonedBP.GEO__c}"/></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!allianceBookingQ1Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!allianceBookingQ2Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!allianceBookingQ3Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!allianceBookingQ4Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!allianceTotal}"/></apex:outputText></td>
+                          </tr>
+                      </apex:variable>
+    
+                      <apex:variable rendered="{!SolProBookingExists}" value="" var="tempOuter">  
+                          <tr class="territory-row">
+                            <td width="20%" class="bgnone">{!$ObjectType.Business_Plan_New__c.Fields.Solution_Provider__c.Label}</td>
+                            <td width="5%" class="bgnone"><apex:outputText value="{!clonedBP.GEO__c}"/></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SolProBookingQ1Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SolProBookingQ2Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SolProBookingQ3Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SolProBookingQ4Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SolProTotal}"/></apex:outputText></td>
+                          </tr>
+                       </apex:variable>
+                       
+                       <apex:variable rendered="{!SerProBookingExists}" value="" var="tempOuter">   
+                          <tr class="territory-row">
+                            <td width="20%" class="bgnone">{!$ObjectType.Business_Plan_New__c.Fields.Service_Provider__c.Label}</td>
+                            <td width="5%" class="bgnone"><apex:outputText value="{!clonedBP.GEO__c}"/></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SerProBookingQ1Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SerProBookingQ2Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SerProBookingQ3Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SerProBookingQ4Total}"/></apex:outputText></td>
+                          <td width="15%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SerProTotal}"/></apex:outputText></td>
+                          </tr>
+                       </apex:variable>
+                       <apex:variable rendered="{!DMBookingExists}" value="" var="tempOuter">   
+                          <tr class="territory-row">
+                            <td width="20%" class="bgnone">{!$ObjectType.Business_Plan_New__c.Fields.Data_Management__c.Label}</td>
+                            <td width="5%" class="bgnone"><apex:outputText value="{!clonedBP.GEO__c}"/></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!DMBookingQ1Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!DMBookingQ2Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!DMBookingQ3Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right highlight"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!DMBookingQ4Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!DMTotal}"/></apex:outputText></td>
+                          </tr>                                                                              
+                       </apex:variable>
+
+                          <tr class="territory-row">
+                            <td width="20%" colspan="2" class="total">Total</td>
+                            <td width="15%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!BookingQ1Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!BookingQ2Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!BookingQ3Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right total"><apex:outputText value="{0, number, ###,###,###,##0.00}"><apex:param value="{!BookingQ4Total}"/></apex:outputText></td>
+                            <td width="15%" class="text-right total">
+                                <c:BPCurrency value1="{!BookingGrandTotal}" currencyIsoCode1="{!Business_Plan_New__c.Creator_Currency__c}"/>                                
+                                
+                            </td>
+                          </tr>
+
+                        </table> 
+                    </apex:outputpanel>
+                </apex:pageblocksection>                
+               <apex:actionStatus id="msg_refresh" stopText="">
+                     <apex:facet name="start">
+                          <apex:outputPanel >
+                                <div style="background-color: #dbeefd; opacity: .80; -moz-opacity: 0.80; filter:alpha(opacity=80); position: absolute; left:0;top:0; width:100%; height:100%; z-index: 3;"><apex:image value="/img/loading32.gif" style="height: 40px; position: relative; left:400px;top:200px;"/></div>
+                            </apex:outputPanel>
+                        </apex:facet>
+                 </apex:actionStatus>                 
+                <apex:commandButton value="{!'< ' + $Label.BP_Prev}" action="{!prevTab}" reRender="tabPanel" styleClass="btn prev" oncomplete="scroll(0, 0)"/>
+                <apex:commandButton value="{!$Label.BP_Next + ' >'}" action="{!nextTab}" reRender="tabPanel" styleClass="btn next" oncomplete="scroll(0, 0)"/>                                
+            </apex:tab>  
+
+            
+            <apex:tab label="{!$Label.BP_Checkout_Approvals}" name="7" disabled="{!checkoutTabEnabled}" ontabenter="tabChange('7')"> 
+            <p class="larger"><span class="bluehead">{!$Label.BP_Nominate_all_the_stakeholders_and_review_key_plan_details}</span><br/>
+            {!$Label.BP_Please_identify_the_stakeholders_involved_in_our_joint_relationship}
+            </p>
+            <br/>             
+            
+                <apex:pageBlockSection columns="2">
+                
+                    <apex:pageblockSectionItem >
+                        <apex:outputLabel value="{!$ObjectType.Business_Plan_New__c.Fields.Descriptive_Business_Plan_Name__c.Label}"/>
+                        <apex:inputField value="{!clonedBP.Descriptive_Business_Plan_Name__c}" style="width: 250px;" Label="{!$ObjectType.Business_Plan_New__c.Fields.Descriptive_Business_Plan_Name__c.Label}"/>                    
+                    </apex:pageblockSectionItem>
+                    
+                    <apex:pageblockSectionItem >
+                        <apex:outputLabel style="font-weight:bold;" value="{!$Label.BP_CA_Team}"/>
+                        <apex:outputText value=""/>
+                    </apex:pageblockSectionItem> 
+                    <apex:pageblockSectionItem >
+                        <apex:outputLabel value="{!$ObjectType.Business_Plan_New__c.Fields.Account_Name__c.Label}"/>
+                        <apex:outputText value="{!clonedBP.Account_Name__c}"/>
+                    </apex:pageblockSectionItem>
+                    <apex:inputField required="true" value="{!clonedBP.CA_Business_Plan_Owner__c}"/>                   
+                    <apex:pageblockSectionItem >
+                        <apex:outputLabel value="{!$Label.BP_Partner_Program_Level}"/>
+                        <apex:outputText value="{!PartnerProgramLevel}"/>
+                    </apex:pageblockSectionItem>
+                     <apex:inputField required="true" value="{!clonedBP.Account_Executive__c}"/> 
+                     
+                     <!--  AR:2267 starts -->
+                     <apex:inputField value="{!clonedBP.Stakeholders_Organization_Map__c}" style="width: 250px;" label="{!$Label.BP_Stakeholders_Organization_Map}"/>
+                     <!-- MANAR08
+                    <apex:pageblockSectionItem >
+                        <apex:outputLabel value="{!$Label.BP_DM_Program_Level}"/>
+                        <apex:outputText value="{!DMProgramLevel}"/>
+                    </apex:pageblockSectionItem>
+                    -->
+                    <apex:inputField value="{!clonedBP.Account_Manager__c}"/> 
+                    <apex:pageblockSectionItem >
+                        <apex:outputLabel value="{!$ObjectType.Business_Plan_New__c.Fields.GEO__c.Label}"/>
+                        <apex:outputText value="{!clonedBP.GEO__c}"/>
+                    </apex:pageblockSectionItem>                                      
+                    <!-- MANAR08 <apex:inputField value="{!Business_Plan_New__c.Stakeholders_Organization_Map__c}" style="width: 250px;" label="{!$Label.BP_Stakeholders_Organization_Map}"/>  -->
+                    <apex:inputField required="true" value="{!clonedBP.Approvers_03__c}"/>                     
+                                                       
+                    <apex:pageblockSectionItem >
+                     <!-- MANAR08  AR:2267
+                        <apex:outputLabel value="{!$ObjectType.Business_Plan_New__c.Fields.GEO__c.Label}"/>
+                        <apex:outputText value="{!clonedBP.GEO__c}"/>
+                        -->
+                    </apex:pageblockSectionItem>
+                    <!-- AR:2267 changes end -->
+                    
+                    <apex:inputField required="true" value="{!clonedBP.Approvers_04__c}"/> 
+                    <apex:pageblockSectionItem >
+                        <apex:outputLabel value=""/>
+                        <apex:outputText value=""/>
+                    </apex:pageblockSectionItem>
+                    <apex:pageblockSectionItem >
+                        <apex:outputLabel value=""/>
+                        <apex:outputText value=""/>
+                    </apex:pageblockSectionItem> 
+                    <apex:pageblockSectionItem >
+                        <apex:outputLabel value=""/>
+                        <apex:outputText value=""/>
+                    </apex:pageblockSectionItem>
+                    <apex:pageblockSectionItem >
+                        <apex:outputLabel style="font-weight:bold;" value="{!$Label.BP_Partner_Team}"/>
+                        <apex:outputText value=""/>
+                    </apex:pageblockSectionItem> 
+                    <!--<apex:inputField required="true" value="{!Business_Plan_New__c.List_Next_Steps__c}" style="width: 250px;"/> -->                                      
+                    <apex:pageblockSectionItem >
+                        <apex:outputLabel value=""/>
+                        <apex:outputText value=""/>
+                    </apex:pageblockSectionItem>
+                    
+                    
+                   <!--  (ISTP,Mari) <apex:inputField required="true" value="{!Business_Plan_New__c.Partner_Business_Plan_Owner__c}" Label="{!$Label.BP_Partner_Business_Plan_Owner}"/> -->                   
+                    
+                   <apex:pageblockSectionItem >
+                    <apex:outputLabel style="color:#4c81ad;font-size:13px;" value="{!$Label.BP_Partner_Business_Plan_Owner}"/>
+                    <apex:outputPanel >
+                       
+                            <div class="requiredInput" layout="block">
+                            <div class="requiredBlock" layout="block"/>
+                           
+                            <apex:selectList id="usrType_txt" value="{!usrTypeSelected}" size="1" rendered="{!!isPowerPartner}">
+                            <apex:selectOptions value="{!usrs}"></apex:selectOptions>
+                            </apex:selectList>    
+                            
+                            <apex:inputText id="partnerBusPlanOwnerName_txt" value="{!partnerBusPlanOwnerName}"  />                        
+                           <a href="#" onclick="openUserLookupPopup('CustomUserLookup','{!$Component.partnerBusPlanOwnerName}', '{!$Component.partnerBusPlanOwnerId}','{!$Component.partnerBusPlanOwnerName_txt}','{!$Component.usrType_txt}'); return false">
+                               <img title="Partner User Lookup (New Window)" class="lookupIcon" alt="Partner User Lookup (New Window)" src="/s.gif"/>                 
+                           </a>  </div>                       
+                   <apex:inputHidden id="partnerBusPlanOwnerName" value="{!partnerBusPlanOwnerName_1}"/>
+                   <apex:inputHidden id="partnerBusPlanOwnerId" value="{!clonedBP.Partner_Business_Plan_Owner__c}"/> 
+                   </apex:outputPanel>
+                   </apex:pageblockSectionItem>
+                   
+                    
+                    <apex:pageblockSectionItem >
+                        <apex:outputLabel value=""/>
+                        <apex:outputText value=""/>
+                    </apex:pageblockSectionItem>
+                    <!--  (ISTP,Mari) <apex:inputField required="true" value="{!Business_Plan_New__c.Partner_Executive_Sponsor__c}"/>  -->
+                    <apex:pageblockSectionItem >
+                    <apex:outputLabel style="color:#4c81ad;font-size:13px;" value="{!$ObjectType.Business_Plan_New__c.Fields.Partner_Executive_Sponsor__c.Label}"/> 
+                    <apex:outputPanel >
+                            <div class="requiredInput" layout="block">
+                            <div class="requiredBlock" layout="block"/>
+                            <apex:selectList id="usrType_Exec" value="{!usrTypeSelected}" size="1" rendered="{!!isPowerPartner}">
+                            <apex:selectOptions value="{!usrs}"></apex:selectOptions>
+                            </apex:selectList> 
+                            <apex:inputtext id="partnerExecSponsorName_txt" value="{!partnerExecSponsorName}" />                         
+                           <a href="#" onclick="openUserLookupPopup('CustomUserLookup','{!$Component.partnerExecSponsorName}', '{!$Component.partnerExecSponsorId}','{!$Component.partnerExecSponsorName_txt}','{!$Component.usrType_Exec}'); return false">
+                               <img title="Partner User Lookup (New Window)" class="lookupIcon" alt="Partner User Lookup (New Window)" src="/s.gif"/>                 
+                           </a>  </div>                       
+                   <apex:inputHidden id="partnerExecSponsorName" value="{!partnerExecSponsorName_1}"/> 
+                   <apex:inputHidden id="partnerExecSponsorId" value="{!clonedBP.Partner_Executive_Sponsor__c}"/> 
+                   </apex:outputPanel>
+                   </apex:pageblockSectionItem>
+                    
+                                         
+                    <apex:inputField value="{!Business_Plan_New__c.Action_Items__c}" style="width: 250px;"/>
+                    <!--  (ISTP,Mari) <apex:inputField value="{!Business_Plan_New__c.Other_Partner_Contact__c}"/> -->
+                    <apex:pageblockSectionItem >
+                    <apex:outputLabel style="color:#4c81ad;font-size:13px;" value="{!$ObjectType.Business_Plan_New__c.Fields.Other_Partner_Contact__c.Label}"/> 
+                    <apex:outputPanel >
+                            <apex:selectList id="usrType_Other" value="{!usrTypeSelected}" size="1" rendered="{!!isPowerPartner}">
+                            <apex:selectOptions value="{!usrs}"></apex:selectOptions>
+                            </apex:selectList> 
+                            <apex:inputtext id="otherPartnerContact_txt" value="{!otherPartnerContact}" />                         
+                           <a href="#" onclick="openUserLookupPopup('CustomUserLookup','{!$Component.otherPartnerContact}', '{!$Component.otherPartnerContactId}','{!$Component.otherPartnerContact_txt}','{!$Component.usrType_Other}'); return false">
+                               <img title="Partner User Lookup (New Window)" class="lookupIcon" alt="Partner User Lookup (New Window)" src="/s.gif"/>                 
+                           </a>                        
+                   <apex:inputHidden id="otherPartnerContact" value="{!otherPartnerContact_1}"/> 
+                   <apex:inputHidden id="otherPartnerContactId" value="{!clonedBP.Other_Partner_Contact__c}"/> 
+                   </apex:outputPanel>
+                   </apex:pageblockSectionItem>
+                    
+                    
+                    <apex:pageblockSectionItem >
+                        <apex:outputLabel value=""/>
+                        <apex:outputText value=""/>
+                    </apex:pageblockSectionItem>
+                    <!--  (ISTP,Mari) <apex:inputField required="true" value="{!Business_Plan_New__c.Approvers_01__c}"/> -->
+                    <apex:pageblockSectionItem >
+                    <apex:outputLabel style="color:#4c81ad;font-size:13px;" value="{!$ObjectType.Business_Plan_New__c.Fields.Approvers_01__c.Label}"/> 
+                    <apex:outputPanel >
+                            <div class="requiredInput" layout="block">
+                            <div class="requiredBlock" layout="block"/>
+                            <apex:selectList id="usrType_Ap01" value="{!usrTypeSelected}" size="1" rendered="{!!isPowerPartner}">
+                            <apex:selectOptions value="{!usrs}"></apex:selectOptions>
+                            </apex:selectList> 
+                            <apex:inputtext id="approver001_txt" value="{!approver001}" />                         
+                           <a href="#" onclick="openUserLookupPopup('CustomUserLookup','{!$Component.approver001}', '{!$Component.approver001Id}','{!$Component.approver001_txt}','{!$Component.usrType_Ap01}'); return false">
+                               <img title="Partner User Lookup (New Window)" class="lookupIcon" alt="Partner User Lookup (New Window)" src="/s.gif"/>                 
+                           </a>  </div>                       
+                   <apex:inputHidden id="approver001" value="{!approver001_1}"/> 
+                   <apex:inputHidden id="approver001Id" value="{!clonedBP.Approvers_01__c}"/> 
+                   </apex:outputPanel>
+                   </apex:pageblockSectionItem>
+                    
+                    <apex:inputField value="{!Business_Plan_New__c.Due_Dates__c}"/>
+                    <!--  (ISTP,Mari) <apex:inputField required="true" value="{!Business_Plan_New__c.Approvers_02__c}"/>-->
+                    <apex:pageblockSectionItem >
+                    <apex:outputLabel style="color:#4c81ad;font-size:13px;" value="{!$ObjectType.Business_Plan_New__c.Fields.Approvers_02__c.Label}"/> 
+                    <apex:outputPanel >
+                            <div class="requiredInput" layout="block">
+                            <div class="requiredBlock" layout="block"/>
+                            <apex:selectList id="usrType_Ap02" value="{!usrTypeSelected}" size="1" rendered="{!!isPowerPartner}">
+                            <apex:selectOptions value="{!usrs}"></apex:selectOptions>
+                            </apex:selectList> 
+                            <apex:inputtext id="approver002_txt" value="{!approver002}" />                         
+                           <a href="#" onclick="openUserLookupPopup('CustomUserLookup','{!$Component.approver002}', '{!$Component.approver002Id}','{!$Component.approver002_txt}','{!$Component.usrType_Ap02}'); return false">
+                               <img title="Partner User Lookup (New Window)" class="lookupIcon" alt="Partner User Lookup (New Window)" src="/s.gif"/>                 
+                           </a>  </div>                       
+                   <apex:inputHidden id="approver002" value="{!approver002_1}"/> 
+                   <apex:inputHidden id="approver002Id" value="{!clonedBP.Approvers_02__c}"/> 
+                   </apex:outputPanel>
+                   </apex:pageblockSectionItem>
+                    
+                </apex:pageBlockSection> 
+                <br></br> 
+                <apex:pageblocksection title="{!$Label.BP_Products_Selected}" columns="1">  
+                <apex:outputpanel >                             
+                   <table width="100%" class="territory fullwidth">
+                  <tr class="territory-row">
+                   <th  width="20%" rowspan="2">{!$Label.BP_Route_to_Market}</th>
+                   <th  width="20%" rowspan="2"> {!$Label.BP_Business_Unit}</th>
+                   <th  width="20%" rowspan="2">{!$Label.BP_Product_Group}</th>
+                   <th  Style="text-align:center" width="20%" colspan="4" align="center">{!$Label.BP_Resource_Count}</th>
+                   <th  width="20%" rowspan="2">{!$Label.BP_JSO_Name}</th>
+                  </tr>
+                  <tr  height="100" class="territory-row" Style="table-layout: fixed;">
+                    <td width="10%" Style="vertical-align:middle;overflow: hidden;" ><div Style="transform: rotate(-60deg)" >Sales</div></td>
+                    <td width="5%" Style="vertical-align:middle;overflow: hidden;" ><div Style="transform: rotate(-60deg)">Technical Sales</div></td>
+                    <td width="5%" Style="vertical-align:middle;overflow: hidden;" ><div Style="transform: rotate(-60deg)">Implementation</div></td>
+                    <td width="5%" Style="vertical-align:middle;overflow: hidden;" ><div Style="transform: rotate(-60deg)">Support</div></td>
+                  </tr>
+                  <apex:repeat value="{!AddedPGs}" var="PG" id="theRepeat">
+                    <tr class="territory-row">
+                            <td >{!PG.myRTM}</td>
+                            <td >{!PG.myBU}</td>
+                            <td >{!PG.myPG}</td>
+                            <td Style="text-align:center">{!PG.Sales}</td>
+                            <td Style="text-align:center">{!PG.TechnicalSales}</td>
+                            <td Style="text-align:center">{!PG.Implementation}</td>
+                            <td Style="text-align:center">{!PG.Support}</td>
+                            <td >{!PG.myJSO}</td>
+                    </tr>
+                  </apex:repeat>                  
+                  </table>
+                  </apex:outputpanel>
+                </apex:pageBlockSection> 
+                <br></br> 
+
+                 <apex:pageblocksection title="{!$Label.BP_Summary_of_Bookings_Committed}" columns="1">
+                    <apex:outputpanel id="TargetRev1">
+                        <table class="territory fullwidth">
+                          <tr class="territory-row">
+                            <th>{!$Label.BP_Route_to_Market}</th>
+                            <th>{!$Label.BP_GEO}</th>
+                            <th class="text-right">{!$Label.BP_Q1} ({!clonedBP.Creator_Currency__c})</th>
+                            <th class="text-right">{!$Label.BP_Q2} ({!clonedBP.Creator_Currency__c})</th>
+                            <th class="text-right">{!$Label.BP_Q3} ({!clonedBP.Creator_Currency__c})</th>
+                            <th class="text-right">{!$Label.BP_Q4} ({!clonedBP.Creator_Currency__c})</th>
+                            <th>{!$Label.BP_Total_Annual}({!clonedBP.Creator_Currency__c})</th>                                                                                                                                                                       
+                          </tr>
+
+                    <apex:variable rendered="{!allianceBookingExists}" value="" var="tempOuter">
+                          <tr class="territory-row">
+                            <td width="20%" class="bgnone">{!$ObjectType.Business_Plan_New__c.Fields.Alliance__c.Label}</td>
+                            <td width="5%" class="bgnone"><apex:outputText value="{!clonedBP.GEO__c}"/></td>
+                            <td width="15%" class="text-right highlight"><apex:outputtext value="{0, number, ###,###,###,##0.00}"><apex:param value="{!allianceBookingQ1Total}"/><apex:actionSupport event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev"/></apex:outputtext></td>
+                            <td width="15%" class="text-right highlight"><apex:outputtext value="{0, number, ###,###,###,##0.00}"><apex:param value="{!allianceBookingQ2Total}"/><apex:actionSupport event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev"/></apex:outputtext></td>
+                            <td width="15%" class="text-right highlight"><apex:outputtext value="{0, number, ###,###,###,##0.00}"><apex:param value="{!allianceBookingQ3Total}"/><apex:actionSupport event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev"/></apex:outputtext></td>
+                            <td width="15%" class="text-right highlight"><apex:outputtext value="{0, number, ###,###,###,##0.00}"><apex:param value="{!allianceBookingQ4Total}"/><apex:actionSupport event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev"/></apex:outputtext></td>
+                            <td width="15%" class="text-right total"><apex:outputtext value="{0, number, ###,###,###,##0.00}"><apex:param value="{!allianceTotal}"/><apex:actionSupport event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev"/></apex:outputtext></td>
+                          </tr>
+                      </apex:variable>
+    
+                      <apex:variable rendered="{!SolProBookingExists}" value="" var="tempOuter">  
+                          <tr class="territory-row">
+                            <td width="20%" class="bgnone">{!$ObjectType.Business_Plan_New__c.Fields.Solution_Provider__c.Label}</td>
+                            <td width="5%" class="bgnone"><apex:outputText value="{!clonedBP.GEO__c}"/></td>
+                            <td width="15%" class="text-right highlight"><apex:outputtext value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SolProBookingQ1Total}"/><apex:actionSupport event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev"/></apex:outputtext></td>
+                            <td width="15%" class="text-right highlight"><apex:outputtext value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SolProBookingQ2Total}"/><apex:actionSupport event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev"/></apex:outputtext></td>
+                            <td width="15%" class="text-right highlight"><apex:outputtext value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SolProBookingQ3Total}"/><apex:actionSupport event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev"/></apex:outputtext></td>
+                            <td width="15%" class="text-right highlight"><apex:outputtext value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SolProBookingQ4Total}"/><apex:actionSupport event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev"/></apex:outputtext></td>
+                            <td width="15%" class="text-right total"><apex:outputtext value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SolProTotal}"/><apex:actionSupport event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev"/></apex:outputtext></td>
+                          </tr>
+                       </apex:variable>
+                       
+                       <apex:variable rendered="{!SerProBookingExists}" value="" var="tempOuter">   
+                          <tr class="territory-row">
+                            <td width="20%" class="bgnone">{!$ObjectType.Business_Plan_New__c.Fields.Service_Provider__c.Label}</td>
+                            <td width="5%" class="bgnone"><apex:outputText value="{!clonedBP.GEO__c}"/></td>
+                            <td width="15%" class="text-right highlight"><apex:outputtext value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SerProBookingQ1Total}"/><apex:actionSupport event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev"/></apex:outputtext></td>
+                            <td width="15%" class="text-right highlight"><apex:outputtext value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SerProBookingQ2Total}"/><apex:actionSupport event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev"/></apex:outputtext></td>
+                            <td width="15%" class="text-right highlight"><apex:outputtext value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SerProBookingQ3Total}"/><apex:actionSupport event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev"/></apex:outputtext></td>
+                            <td width="15%" class="text-right highlight"><apex:outputtext value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SerProBookingQ4Total}"/><apex:actionSupport event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev"/></apex:outputtext></td>
+                            <td width="15%" class="text-right total"><apex:outputtext value="{0, number, ###,###,###,##0.00}"><apex:param value="{!SerProTotal}"/><apex:actionSupport event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev"/></apex:outputtext></td>
+                          </tr>
+                       </apex:variable>
+                       <apex:variable rendered="{!DMBookingExists}" value="" var="tempOuter">   
+                          <tr class="territory-row">
+                            <td width="20%" class="bgnone">{!$ObjectType.Business_Plan_New__c.Fields.Data_Management__c.Label}</td>
+                            <td width="5%" class="bgnone"><apex:outputText value="{!clonedBP.GEO__c}"/></td>
+                            <td width="15%" class="text-right highlight"><apex:outputtext value="{0, number, ###,###,###,##0.00}"><apex:param value="{!DMBookingQ1Total}"/><apex:actionSupport event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev"/></apex:outputtext></td>
+                            <td width="15%" class="text-right highlight"><apex:outputtext value="{0, number, ###,###,###,##0.00}"><apex:param value="{!DMBookingQ2Total}"/><apex:actionSupport event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev"/></apex:outputtext></td>
+                            <td width="15%" class="text-right highlight"><apex:outputtext value="{0, number, ###,###,###,##0.00}"><apex:param value="{!DMBookingQ3Total}"/><apex:actionSupport event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev"/></apex:outputtext></td>
+                            <td width="15%" class="text-right highlight"><apex:outputtext value="{0, number, ###,###,###,##0.00}"><apex:param value="{!DMBookingQ4Total}"/><apex:actionSupport event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev"/></apex:outputtext></td>
+                            <td width="15%" class="text-right total"><apex:outputtext value="{0, number, ###,###,###,##0.00}"><apex:param value="{!DMTotal}"/><apex:actionSupport event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev"/></apex:outputtext></td>
+                          </tr>                                                                              
+                       </apex:variable>
+
+                          <tr class="territory-row">
+                            <td width="20%" colspan="2" class="total">Total</td>
+                            <td width="15%" class="text-right total"><apex:outputtext value="{0, number, ###,###,###,##0.00}"><apex:param value="{!BookingQ1Total}"/><apex:actionSupport event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev"/></apex:outputtext></td>
+                            <td width="15%" class="text-right total"><apex:outputtext value="{0, number, ###,###,###,##0.00}"><apex:param value="{!BookingQ2Total}"/><apex:actionSupport event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev"/></apex:outputtext></td>
+                            <td width="15%" class="text-right total"><apex:outputtext value="{0, number, ###,###,###,##0.00}"><apex:param value="{!BookingQ3Total}"/><apex:actionSupport event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev"/></apex:outputtext></td>
+                            <td width="15%" class="text-right total"><apex:outputtext value="{0, number, ###,###,###,##0.00}"><apex:param value="{!BookingQ4Total}"/><apex:actionSupport event="onchange" rerender="PGTable1,RevSummary,SolRevSummary,TargetRev"/></apex:outputtext></td>
+                            <td width="15%" class="text-right total">
+                                <c:BPCurrency value1="{!BookingGrandTotal}" currencyIsoCode1="{!clonedBP.Creator_Currency__c}"/>                                
+                                
+                            </td>
+                          </tr>
+
+                        </table> 
+                    </apex:outputpanel>
+                </apex:pageblocksection>                     
+                <br></br>
+                <br></br>                                                
+                <apex:commandButton value="{!'< ' + $Label.BP_Prev}" action="{!prevTab}" reRender="tabPanel" styleClass="btn prev" oncomplete="scroll(0, 0)"/>                    
+                <apex:commandButton value="Save" action="{!saveClonedBP}" styleClass="btn next"/>
+            </apex:tab>                                
+        </apex:tabPanel>
+        <apex:inputHidden id="contactEmail" value="{!testText}"/>
+        <apex:inputHidden id="contactPhone" value="{!testText}"/> 
+        <apex:inputHidden id="contactMobile" value="{!testText}"/>   
+        <apex:inputHidden id="contactFax" value="{!testText}"/> 
+        <apex:inputHidden id="contactTitle" value="{!testText}"/> 
+        <apex:inputHidden id="hdnContactName" value="{!testText}"/>
+
+       </apex:pageBlock>
+    </apex:form>
+</apex:page>

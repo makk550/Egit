@@ -1,0 +1,8 @@
+<apex:page standardController="Site_Association__c"  extensions="SiteAssociationGTSCallController" action="{!autoRun}">
+<apex:pageMessages />
+<apex:form >
+<br/>
+<br/>
+  <apex:commandButton value="Back" action="{!GoBack}"/>
+</apex:form>
+</apex:page>

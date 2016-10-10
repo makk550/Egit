@@ -1,0 +1,96 @@
+<apex:page controller="LighteningCBRCertificationController"   title="Certifications"  > <!-- action="{!getCBRCertificationDetails}"-->
+    <apex:includeScript value="https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js" />
+    <apex:includeScript value="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.0/jquery-ui.min.js" />
+    <apex:form >
+        <script type="text/javascript">
+        $(document).ready(function(){
+            $('#searchListNames').keyup(function(){
+                searchTable($(this).val());
+            });
+        });
+        function searchTable(searchText)
+        {
+            /*get Table using its Id */
+            var table = $('table[id$=table1]');
+            //var $row = $(this).closest('table').children('tr:first');
+            //   var $row = $(this).closest('table1').children('tbody').children('tr:first').children('td.ResultsHeader').children('span.gridRCHders');
+
+            table.find('tr').each(function(index, row){
+                var allCells = $(row).find('td');
+                if(allCells.length > 0)
+                {
+                    var found = false;
+                    allCells.each(function(index, td)
+                                  {
+                                      var regExp = new RegExp(searchText, 'gim');                                      
+                                      if(regExp.test($(td).text()))
+                                      {
+                                          	//added to skip the contents of script tag
+                                            if($(td).has('script').length > 0){
+                                                var regExp1 = new RegExp(searchText, 'gim');
+                                                var tt = $(td).find('a');
+                                                console.log('tt.html():'+tt.html());
+                                                if(regExp1.test(tt.html())){
+                                                        found = true;
+                                                        return false;
+                                                }                                
+                                            }
+                                            else{
+                                                found = true;
+                                                return false;
+                                            }
+                                      }
+                                  });
+                    if(found == true)$(row).show();else $(row).hide();
+                }
+            });
+        }   
+        </script>
+        <apex:pageMessages id="errors" />
+        <apex:pageBlock id="tblData" title="Certifications Total Records :{!totalRecs}" rendered="{!isDetailsPresent}">      
+                      <div style="width:600px;margin:10px auto;">
+                <table cellpadding="2" cellspacing="2" width="100%">
+                    <script>
+                    	$('#searchListNames').keyup(function(){
+                			searchTable($(this).val());
+            			});
+                    </script>
+                    <tr><td style="width:105px"><b>Filter By Any Text:</b></td>
+                        <td style="width:400px"><input type="text" id="searchListNames" /></td> 
+                    </tr>
+                </table>
+            </div>      
+         
+            
+            <apex:pageblockTable value="{!cbrList}" var="cbr" columnsWidth="10%,5%,10%,5%,5%,5%,5%,10%" id="table1">
+                <apex:column headerValue="Name">
+                    <apex:commandLink action="{!displayRecord}">{!cbr.Employee_Name__c}
+                        <apex:param name="contactID" value="{!cbr.SFDC_ID__c}" assignTo="{!contactID}" />                        
+                    </apex:commandLink>
+                </apex:column>              
+                <apex:column headerValue="Badge" value="{!cbr.badge__c}"/>             
+                <apex:column headerValue="CA Product Name" value="{!cbr.ca_product_name__c}"/>
+                <apex:column headerValue="Certified" value="{!cbr.certified__c}"/>
+                <apex:column headerValue="Status Reason" value="{!cbr.status_reason__c}"/>
+                <apex:column headerValue="Product Certification Effective Date" value="{!cbr.valid_from__c}"/>
+                <apex:column headerValue="Product Certification End Date" value="{!cbr.valid_to__c}"/>
+                <apex:column headerValue="Type" value="{!cbr.Employee_Type__c}"/>
+                <apex:column headerValue="Desc" value="{!cbr.ca_product_description__c}"/>
+            </apex:pageblockTable>
+            
+            <apex:pageblockButtons >
+              <apex:commandButton value="First Page" rerender="tblData" action="{!FirstPage}" disabled="{!prev}"/> 
+                <apex:commandButton value="Previous" rerender="tblData" action="{!previous}" disabled="{!prev}"/>
+                
+                <apex:commandButton value="Next" rerender="tblData" action="{!next}" disabled="{!nxt}"/>
+              
+              <apex:commandButton value="Last Page" rerender="tblData" action="{!LastPage}" disabled="{!nxt}"/> 
+                <apex:outputText style="font-weight:bold" value="{! (OffsetSize+1)} - {! (OffsetSize + LimitSize)}" rendered="{!!nxt}"></apex:outputText>
+                 <apex:outputText style="font-weight:bold" value="{! (OffsetSize+1)} - {!totalRecs }" rendered="{!nxt}"></apex:outputText> 
+            </apex:pageblockButtons>
+            
+            
+        </apex:pageBlock>
+        
+    </apex:form>
+</apex:page>

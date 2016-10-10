@@ -1,0 +1,122 @@
+<apex:page standardController="Case" extensions="Jive_CreateCaseController" showHeader="false" sidebar="false" id="caseCreatePage" standardStylesheets="true">
+<!-- <apex:page standardController="case" extensions="Jive_CreateCaseController" standardStylesheets="false" showHeader="false" sidebar="false"> -->
+<head>
+	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"></link>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+	<style>
+		 .inputField{
+			  width: 97%;
+			  height: 34px;
+			  padding: 6px 12px;
+			  font-size: 14px;
+			  line-height: 1.42857143;
+			  color: blue;
+			  background-color: blue;
+			  border-radius: 4px;
+		   }
+		  
+		   .top-buffer { margin-top:20px; }
+		  
+		   .buttonStyle { 
+		   	background-color:blue;
+			font-weight:bold;
+		    }
+		    .btn {
+    padding: 14px 24px;
+    border: 0 none;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    background-color:#337ab7;
+	}
+
+	.labelCust{
+		padding-right:10px;
+	}
+
+	</style>
+</head>
+
+<div class = "container-fluid">
+	<div class="panel panel-primary">
+	      <div class="panel-heading">
+	        <h3 class="panel-title" >Case Created</h3>
+	      </div>
+	      <div class="panel-body">
+	        <apex:form >
+	        
+	        <div class="row">
+	        	<div class="col-sm-4">
+					Logged in as: {! $User.FirstName + ' ' + $User.LastName }
+				</div>
+			</div>
+
+	        <div class="row top-buffer">
+	        	<div class="col-sm-4">
+
+<!-- 		            <div class="form-group">
+			                <label for="Subject">Case Number</label>
+			      		    <input type="text" class="form-control" value="{! case.CaseNumber}" readonly="true" />
+			        </div> -->
+		            <div class="form-group">
+			                <label for="Subject">Subject</label>
+			      		    <input type="text" class="form-control" value="{! case.Subject}" readonly="true" />
+			        </div>
+			        <div class="form-group">
+			                <label for="Subject">Severity</label>
+			      			<input type="text" class="form-control" value="{! case.Severity__C}" readonly="true" />
+			        </div>
+			        <div class="form-group">
+			                <label for="Subject">Description</label>
+			      			<input type="text" class="form-control" value="{! case.Description}" readonly="true" />
+			        </div>
+			        <div class="form-group">
+			                <label for="Subject">Severity</label>
+			      			<input type="text" class="form-control" value="{! case.Business_Impact__C}" readonly="true" />
+			        </div>
+
+		     	</div>       	
+
+				<div class="col-sm-4 col-sm-offset-1">    
+		            <div class="form-group">
+		                <label >Product Release Selection</label>
+		                <input type="text" class="form-control" value="{! productReleaseSelection}" readonly="true" />
+		            </div>
+		             <div class="form-group">
+		                <label>Product Operating System</label>		                
+		                <input type="text" class="form-control" value="{! productOperatingSystem}" readonly="true"/>
+	        		 </div>
+		            <div class="form-group">
+		                <label>Product Service Pack </label>		             
+		                <input type="text" class="form-control" value="{! productServicePack}" readonly="true"/>
+		            </div>
+		        </div>
+		    </div>    
+	          
+	        
+	        </apex:form>
+	       </div>
+	    </div>
+
+   </div>
+
+    <span data-iframe-height="">&nbsp;</span>
+   	<c:jQuery />
+    <script>
+          var opts = j$('.case-severity option[value="1"]');
+          if (opts.length > 0) { 
+            opts.remove();
+          }   
+    </script>
+    
+    <script type="text/javascript" src="{! URLFOR( $Resource.JiveTurkey, 'js/iframe-resizer/iframeResizer.contentWindow.min.js' ) }"></script>
+
+ <!--    <c:jQuery />
+    
+    <script>
+   		j$(".user").remove();	
+    </script>
+ -->
+
+</apex:page>
