@@ -5,6 +5,7 @@ public with sharing class account_Delete_ToMDM_class{
         List<String> EntIds = new List<String>();
         for(Account a : AccDelRec){
             EntIds.add(a.Enterprise_ID__c);
+        
         } 
         callAccountDeleteWebService(EntIds);
         //System.debug('in class--account='+newList);
